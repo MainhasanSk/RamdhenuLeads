@@ -62,7 +62,8 @@ export async function createTelecallerAccount(
   } finally {
     // Clean up secondary app
     try {
-      await secondaryApp.delete();
+      const { deleteApp } = await import('firebase/app');
+      await deleteApp(secondaryApp);
     } catch {}
   }
 }
