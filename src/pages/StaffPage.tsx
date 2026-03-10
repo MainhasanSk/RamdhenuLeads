@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { getAllUsers, createTelecallerAccount, toggleUserActive, deleteUserProfile, type AppUser } from '@/lib/userService';
+import { getAllUsers, createTelecallerAccount, toggleUserActive, deleteUserProfile, updateUserFields, type AppUser } from '@/lib/userService';
 import { SERVICE_OPTIONS } from '@/types/lead';
 import { getAllCampaigns, type Campaign } from '@/lib/campaignService';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
