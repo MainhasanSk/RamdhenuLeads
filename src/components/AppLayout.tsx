@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, UserPlus, Users, BarChart3, Menu, X, Zap } from 'lucide-react';
+import { LayoutDashboard, UserPlus, Users, BarChart3, Menu, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import logo from '@/assets/logo.png';
 
 const navItems = [
   { label: 'Dashboard', icon: LayoutDashboard, path: '/' },
@@ -30,9 +31,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       >
         {/* Logo */}
         <div className="h-16 flex items-center gap-2.5 px-5 border-b border-sidebar-border">
-          <div className="w-8 h-8 rounded-lg bg-sidebar-primary flex items-center justify-center">
-            <Zap className="w-4 h-4 text-sidebar-primary-foreground" />
-          </div>
+          <img src={logo} alt="Junak Digital Dynamics" className="w-8 h-8 rounded-lg object-cover" />
           <div>
             <h1 className="text-sm font-bold text-sidebar-accent-foreground tracking-tight">Junak Digital</h1>
             <p className="text-[10px] text-sidebar-muted tracking-wider uppercase">Dynamics CRM</p>
