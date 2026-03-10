@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, UserPlus, Users, BarChart3, Menu, X } from 'lucide-react';
+import { LayoutDashboard, UserPlus, Users, BarChart3, Menu, X, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/context/AuthContext';
 import logo from '@/assets/logo.png';
 
 const navItems = [
@@ -14,6 +15,7 @@ const navItems = [
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
+  const { logout, user } = useAuth();
 
   return (
     <div className="min-h-screen flex bg-background">
@@ -62,6 +64,14 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               </Link>
             );
           })}
+          
+          <button
+            onClick={() => logout()}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors"
+          >
+            <LogOut className="w-4.5 h-4.5" />
+            Logout
+          </button>
         </nav>
 
         <div className="p-4 mx-3 mb-4 rounded-lg bg-sidebar-accent">
@@ -77,7 +87,13 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             <Menu className="w-5 h-5" />
           </button>
           <div className="flex-1" />
-          <img src={logo} alt="Junak Digital Dynamics" className="w-8 h-8 rounded-full object-cover" />
+          <div className="flex items-center gap-3">
+            <div className="hidden sm:flex flex-col items-end text-right">
+              <span className="text-xs font-medium text-foreground">{user?.email}</span>
+              <span className="text-[10px] text-muted-foreground uppercase">Administrator</span>
+            </div>
+            <img src={logo} alt="User" className="w-9 h-9 rounded-full border border-border shadow-sm object-cover" />
+          </div>
         </header>
         <main className="flex-1 p-4 lg:p-8 overflow-auto">
           {children}

@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { CalendarClock } from 'lucide-react';
+import { CalendarClock, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 export function UpdateFollowUpDialog({ lead }: { lead: Lead }) {
@@ -14,16 +14,24 @@ export function UpdateFollowUpDialog({ lead }: { lead: Lead }) {
   const [open, setOpen] = useState(false);
   const [date, setDate] = useState(lead.nextFollowUpDate);
   const [note, setNote] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!date) return;
-    updateLead(lead.id, { nextFollowUpDate: date });
-    if (note.trim()) {
-      addFollowUp(lead.id, { date: new Date().toISOString().split('T')[0], note: note.trim() });
+    
+    setIsLoading(true);
+    try {
+      await updateLead(lead.id, { nextFollowUpDate: date });
+      if (note.trim()) {
+        await addFollowUp(lead.id, { date: new Date().toISOString().split('T')[0], note: note.trim() });
+      }
+      setOpen(false);
+      setNote('');
+    } catch (error) {
+      // toast is handled in context
+    } finally {
+      setIsLoading(false);
     }
-    toast.success('Follow-up updated');
-    setOpen(false);
-    setNote('');
   };
 
   return (
@@ -46,7 +54,10 @@ export function UpdateFollowUpDialog({ lead }: { lead: Lead }) {
             <Label>Note (optional)</Label>
             <Textarea placeholder="Add a note about this follow-up..." value={note} onChange={e => setNote(e.target.value)} />
           </div>
-          <Button onClick={handleSave} className="w-full">Save</Button>
+          <Button onClick={handleSave} className="w-full" disabled={isLoading}>
+            {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+            {isLoading ? 'Saving...' : 'Save'}
+          </Button>
         </div>
       </DialogContent>
     </Dialog>

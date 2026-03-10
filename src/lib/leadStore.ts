@@ -60,8 +60,7 @@ export function addFollowUp(leadId: string, entry: Omit<FollowUpEntry, 'id'>): L
   return leads[idx];
 }
 
-export function exportLeadsCSV(): string {
-  const leads = getLeads();
+export function exportLeadsCSV(leads: Lead[]): string {
   const headers = ['Inquiry Date', 'Customer Name', 'Phone', 'Campaign', 'Service', 'Follow-up Date', 'Status', 'Amount', 'Cancel Reason'];
   const rows = leads.map(l => [
     l.inquiryDate, l.customerName, l.phoneNumber, l.campaignSource,

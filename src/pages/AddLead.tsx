@@ -9,11 +9,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { UserPlus } from 'lucide-react';
+import { UserPlus, Loader2 } from 'lucide-react';
 
 export default function AddLead() {
   const navigate = useNavigate();
   const { addLead } = useLeads();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [form, setForm] = useState({
     inquiryDate: new Date().toISOString().split('T')[0],
     customerName: '',
@@ -28,27 +29,41 @@ export default function AddLead() {
     cancelReason: '',
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.customerName || !form.phoneNumber || !form.campaignSource || !form.serviceRequired || !form.nextFollowUpDate) {
       toast.error('Please fill all required fields');
       return;
     }
-    addLead({
-      inquiryDate: form.inquiryDate,
-      customerName: form.customerName,
-      phoneNumber: form.phoneNumber,
-      campaignSource: form.campaignSource as CampaignSource,
-      serviceRequired: form.serviceRequired as ServiceType,
-      customService: form.customService,
-      businessDetails: form.businessDetails,
-      nextFollowUpDate: form.nextFollowUpDate,
-      status: form.status,
-      amountReceived: form.status === 'Convert' ? Number(form.amountReceived) || 0 : undefined,
-      cancelReason: form.status === 'Cancel' ? form.cancelReason : undefined,
-    });
-    toast.success('Lead added successfully!');
-    navigate('/leads');
+    
+    setIsSubmitting(true);
+    try {
+      const leadData: any = {
+        inquiryDate: form.inquiryDate,
+        customerName: form.customerName,
+        phoneNumber: form.phoneNumber,
+        campaignSource: form.campaignSource as CampaignSource,
+        serviceRequired: form.serviceRequired as ServiceType,
+        customService: form.customService,
+        businessDetails: form.businessDetails,
+        nextFollowUpDate: form.nextFollowUpDate,
+        status: form.status,
+      };
+
+      if (form.status === 'Convert') {
+        leadData.amountReceived = Number(form.amountReceived) || 0;
+      } else if (form.status === 'Cancel') {
+        leadData.cancelReason = form.cancelReason;
+      }
+
+      await addLead(leadData);
+      // toast success is handled in context
+      navigate('/leads');
+    } catch (error) {
+      // toast error is handled in context
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -146,7 +161,10 @@ export default function AddLead() {
               </div>
             )}
 
-            <Button type="submit" className="w-full" size="lg">Add Lead</Button>
+            <Button type="submit" className="w-full" size="lg" disabled={isSubmitting}>
+              {isSubmitting && <Loader2 className="w-5 h-5 mr-2 animate-spin" />}
+              {isSubmitting ? 'Adding...' : 'Add Lead'}
+            </Button>
           </form>
         </CardContent>
       </Card>

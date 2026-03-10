@@ -3,11 +3,12 @@ import { useLeads } from '@/context/LeadContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import { startOfMonth, endOfMonth, parseISO } from 'date-fns';
+import { Loader2 } from 'lucide-react';
 
 const COLORS = ['hsl(217,91%,50%)', 'hsl(142,71%,45%)', 'hsl(38,92%,50%)', 'hsl(0,72%,51%)', 'hsl(262,83%,58%)', 'hsl(199,89%,48%)', 'hsl(25,95%,53%)'];
 
 export default function ReportsPage() {
-  const { leads } = useLeads();
+  const { leads, isLoading } = useLeads();
   const monthStart = startOfMonth(new Date());
   const monthEnd = endOfMonth(new Date());
 
@@ -61,6 +62,15 @@ export default function ReportsPage() {
   const totalLeads = leads.length;
   const convertedCount = leads.filter(l => l.status === 'Convert').length;
   const conversionRate = totalLeads ? Math.round((convertedCount / totalLeads) * 100) : 0;
+
+  if (isLoading) {
+    return (
+      <div className="h-[60vh] flex flex-col items-center justify-center gap-4">
+        <Loader2 className="w-12 h-12 animate-spin text-primary" />
+        <p className="text-muted-foreground animate-pulse">Analyzing CRM Data...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 animate-fade-in">

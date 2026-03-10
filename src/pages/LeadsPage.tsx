@@ -13,12 +13,12 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { format, parseISO } from 'date-fns';
-import { Search, Trash2, Edit, Phone, Download, History } from 'lucide-react';
+import { Search, Trash2, Edit, Phone, Download, History, Loader2 } from 'lucide-react';
 import { exportLeadsCSV } from '@/lib/leadStore';
 import { FollowUpTimeline } from '@/components/FollowUpTimeline';
 
 export default function LeadsPage() {
-  const { leads, updateLead, deleteLead } = useLeads();
+  const { leads, updateLead, deleteLead, isLoading } = useLeads();
   const [search, setSearch] = useState('');
   const [filterCampaign, setFilterCampaign] = useState<string>('all');
   const [filterService, setFilterService] = useState<string>('all');
@@ -27,6 +27,7 @@ export default function LeadsPage() {
   const [editLead, setEditLead] = useState<Lead | null>(null);
   const [editForm, setEditForm] = useState<Partial<Lead>>({});
   const [historyLead, setHistoryLead] = useState<Lead | null>(null);
+  const [isActionLoading, setIsActionLoading] = useState(false);
 
   const filtered = useMemo(() => {
     return leads.filter(l => {
@@ -43,22 +44,34 @@ export default function LeadsPage() {
     setEditForm({ ...lead });
   };
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     if (!editLead) return;
-    updateLead(editLead.id, editForm);
-    toast.success('Lead updated');
-    setEditLead(null);
+    setIsActionLoading(true);
+    try {
+      await updateLead(editLead.id, editForm);
+      setEditLead(null);
+    } catch (error) {
+      // toast is handled in context
+    } finally {
+      setIsActionLoading(false);
+    }
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm('Are you sure you want to delete this lead?')) {
-      deleteLead(id);
-      toast.success('Lead deleted');
+      setIsActionLoading(true);
+      try {
+        await deleteLead(id);
+      } catch (error) {
+        // toast is handled in context
+      } finally {
+        setIsActionLoading(false);
+      }
     }
   };
 
   const handleExport = () => {
-    const csv = exportLeadsCSV();
+    const csv = exportLeadsCSV(leads);
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -135,7 +148,16 @@ export default function LeadsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filtered.length === 0 ? (
+                {isLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={9} className="text-center py-12">
+                      <div className="flex flex-col items-center gap-2">
+                        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                        <p className="text-sm text-muted-foreground">Loading leads from Firebase...</p>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ) : filtered.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">No leads found</TableCell>
                   </TableRow>
@@ -223,7 +245,10 @@ export default function LeadsPage() {
               <Label>Business Details</Label>
               <Textarea value={editForm.businessDetails || ''} onChange={e => setEditForm({ ...editForm, businessDetails: e.target.value })} />
             </div>
-            <Button onClick={handleSaveEdit} className="w-full">Save Changes</Button>
+            <Button onClick={handleSaveEdit} className="w-full" disabled={isActionLoading}>
+              {isActionLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              {isActionLoading ? 'Saving...' : 'Save Changes'}
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

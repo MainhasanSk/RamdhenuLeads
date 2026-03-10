@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useLeads } from '@/context/LeadContext';
 import { format, isToday, isBefore, startOfDay, startOfMonth, endOfMonth, parseISO } from 'date-fns';
-import { Phone, CalendarClock, TrendingUp, Users, IndianRupee, XCircle, AlertTriangle, MessageCircle } from 'lucide-react';
+import { Phone, CalendarClock, TrendingUp, Users, IndianRupee, XCircle, AlertTriangle, MessageCircle, Loader2 } from 'lucide-react';
 import { StatusBadge } from '@/components/StatusBadge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,7 +11,7 @@ import { UpdateFollowUpDialog } from '@/components/UpdateFollowUpDialog';
 import { QuickStatusUpdate } from '@/components/QuickStatusUpdate';
 
 export default function Dashboard() {
-  const { leads } = useLeads();
+  const { leads, isLoading } = useLeads();
   const today = startOfDay(new Date());
   const monthStart = startOfMonth(new Date());
   const monthEnd = endOfMonth(new Date());
@@ -69,6 +69,15 @@ export default function Dashboard() {
     });
     return weeks;
   }, [monthlyConverted]);
+
+  if (isLoading) {
+    return (
+      <div className="h-[60vh] flex flex-col items-center justify-center gap-4">
+        <Loader2 className="w-12 h-12 animate-spin text-primary" />
+        <p className="text-muted-foreground animate-pulse">Initializing CRM Dashboard...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 animate-fade-in">

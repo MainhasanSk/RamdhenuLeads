@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { ChevronDown, TrendingUp, XCircle, Phone } from 'lucide-react';
+import { ChevronDown, TrendingUp, XCircle, Phone, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 export function QuickStatusUpdate({ lead }: { lead: Lead }) {
@@ -15,27 +15,42 @@ export function QuickStatusUpdate({ lead }: { lead: Lead }) {
   const [dialogType, setDialogType] = useState<'convert' | 'cancel' | null>(null);
   const [amount, setAmount] = useState('');
   const [reason, setReason] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleConvert = () => {
+  const handleConvert = async () => {
     if (!amount || isNaN(Number(amount))) {
       toast.error('Please enter a valid amount');
       return;
     }
-    updateLead(lead.id, { status: 'Convert', amountReceived: Number(amount) });
-    toast.success(`${lead.customerName} marked as Converted`);
-    setDialogType(null);
-    setAmount('');
+    
+    setIsLoading(true);
+    try {
+      await updateLead(lead.id, { status: 'Convert', amountReceived: Number(amount) });
+      setDialogType(null);
+      setAmount('');
+    } catch (error) {
+      // toast is handled in context
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleCancel = () => {
+  const handleCancel = async () => {
     if (!reason.trim()) {
       toast.error('Please enter a cancellation reason');
       return;
     }
-    updateLead(lead.id, { status: 'Cancel', cancelReason: reason.trim() });
-    toast.success(`${lead.customerName} marked as Cancelled`);
-    setDialogType(null);
-    setReason('');
+    
+    setIsLoading(true);
+    try {
+      await updateLead(lead.id, { status: 'Cancel', cancelReason: reason.trim() });
+      setDialogType(null);
+      setReason('');
+    } catch (error) {
+      // toast is handled in context
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -66,7 +81,10 @@ export function QuickStatusUpdate({ lead }: { lead: Lead }) {
               <Label>Amount Received (₹)</Label>
               <Input type="number" placeholder="e.g. 25000" value={amount} onChange={e => setAmount(e.target.value)} />
             </div>
-            <Button onClick={handleConvert} className="w-full">Mark as Converted</Button>
+            <Button onClick={handleConvert} className="w-full" disabled={isLoading}>
+              {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              {isLoading ? 'Converting...' : 'Mark as Converted'}
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
@@ -81,7 +99,10 @@ export function QuickStatusUpdate({ lead }: { lead: Lead }) {
               <Label>Cancellation Reason</Label>
               <Textarea placeholder="Why is this lead being cancelled?" value={reason} onChange={e => setReason(e.target.value)} />
             </div>
-            <Button onClick={handleCancel} variant="destructive" className="w-full">Mark as Cancelled</Button>
+            <Button onClick={handleCancel} variant="destructive" className="w-full" disabled={isLoading}>
+              {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              {isLoading ? 'Cancelling...' : 'Mark as Cancelled'}
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
