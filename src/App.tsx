@@ -12,6 +12,7 @@ import AddLead from "@/pages/AddLead";
 import LeadsPage from "@/pages/LeadsPage";
 import ReportsPage from "@/pages/ReportsPage";
 import StaffPage from "@/pages/StaffPage";
+import CampaignsPage from "@/pages/CampaignsPage";
 import LoginPage from "@/pages/Login";
 import NotFound from "./pages/NotFound";
 
