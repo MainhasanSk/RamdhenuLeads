@@ -156,7 +156,7 @@ export default function LeadsPage() {
                     <TableCell colSpan={9} className="text-center py-12">
                       <div className="flex flex-col items-center gap-2">
                         <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                        <p className="text-sm text-muted-foreground">Loading leads from Firebase...</p>
+                        <p className="text-sm text-muted-foreground">Loading leads...</p>
                       </div>
                     </TableCell>
                   </TableRow>
