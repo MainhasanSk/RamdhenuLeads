@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { getAllUsers, createTelecallerAccount, toggleUserActive, deleteUserProfile, type AppUser } from '@/lib/userService';
-import { CAMPAIGN_OPTIONS, SERVICE_OPTIONS } from '@/types/lead';
+import { SERVICE_OPTIONS } from '@/types/lead';
+import { getAllCampaigns, type Campaign } from '@/lib/campaignService';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,6 +24,7 @@ export default function StaffPage() {
   const [form, setForm] = useState({ email: '', password: '', displayName: '' });
   const [selectedCampaigns, setSelectedCampaigns] = useState<string[]>([]);
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
+  const [dbCampaigns, setDbCampaigns] = useState<Campaign[]>([]);
 
   const fetchUsers = async () => {
     setIsLoading(true);
@@ -39,6 +41,7 @@ export default function StaffPage() {
 
   useEffect(() => {
     fetchUsers();
+    getAllCampaigns().then(setDbCampaigns).catch(console.error);
   }, []);
 
   if (!isAdmin) {
@@ -179,13 +182,15 @@ export default function StaffPage() {
               <div>
                 <Label className="mb-2 block">Allowed Campaign Sources *</Label>
                 <div className="grid grid-cols-2 gap-2 border rounded-md p-3 bg-muted/30">
-                  {CAMPAIGN_OPTIONS.map(campaign => (
-                    <label key={campaign} className="flex items-center gap-2 text-sm cursor-pointer">
+                  {dbCampaigns.map(campaign => (
+                    <label key={campaign.id} className="flex items-center gap-2 text-sm cursor-pointer">
                       <Checkbox
-                        checked={selectedCampaigns.includes(campaign)}
-                        onCheckedChange={() => toggleCampaign(campaign)}
+                        checked={selectedCampaigns.includes(campaign.name)}
+                        onCheckedChange={() => toggleCampaign(campaign.name)}
                       />
-                      {campaign}
+                      <span className={!campaign.isActive ? 'line-through text-muted-foreground' : ''}>
+                        {campaign.name} {!campaign.isActive && '(stopped)'}
+                      </span>
                     </label>
                   ))}
                 </div>

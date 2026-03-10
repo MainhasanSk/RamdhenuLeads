@@ -12,6 +12,7 @@ import AddLead from "@/pages/AddLead";
 import LeadsPage from "@/pages/LeadsPage";
 import ReportsPage from "@/pages/ReportsPage";
 import StaffPage from "@/pages/StaffPage";
+import CampaignsPage from "@/pages/CampaignsPage";
 import LoginPage from "@/pages/Login";
 import NotFound from "./pages/NotFound";
 
@@ -38,6 +39,7 @@ const App = () => (
                         <Route path="/leads" element={<LeadsPage />} />
                         <Route path="/reports" element={<ReportsPage />} />
                         <Route path="/staff" element={<StaffPage />} />
+                        <Route path="/campaigns" element={<CampaignsPage />} />
                         <Route path="*" element={<NotFound />} />
                       </Routes>
                     </AppLayout>

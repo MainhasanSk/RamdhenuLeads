@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, UserPlus, Users, BarChart3, Menu, X, LogOut, UsersRound } from 'lucide-react';
+import { LayoutDashboard, UserPlus, Users, BarChart3, Menu, X, LogOut, UsersRound, Megaphone } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/context/AuthContext';
 import logo from '@/assets/logo.png';
@@ -13,6 +13,7 @@ const getNavItems = (isAdmin: boolean) => {
     { label: 'Reports', icon: BarChart3, path: '/reports' },
   ];
   if (isAdmin) {
+    items.push({ label: 'Campaigns', icon: Megaphone, path: '/campaigns' });
     items.push({ label: 'Staff', icon: UsersRound, path: '/staff' });
   }
   return items;

@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLeads } from '@/context/LeadContext';
 import { useAuth } from '@/context/AuthContext';
-import { CAMPAIGN_OPTIONS, SERVICE_OPTIONS, CampaignSource, ServiceType, LeadStatus } from '@/types/lead';
+import { SERVICE_OPTIONS, CampaignSource, ServiceType, LeadStatus } from '@/types/lead';
+import { getActiveCampaigns, type Campaign } from '@/lib/campaignService';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -17,11 +18,16 @@ export default function AddLead() {
   const { addLead } = useLeads();
   const { profile, isAdmin } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [activeCampaigns, setActiveCampaigns] = useState<Campaign[]>([]);
 
-  // Filter options based on user's allowed campaigns/services
-  const campaignOptions = isAdmin 
-    ? CAMPAIGN_OPTIONS 
-    : CAMPAIGN_OPTIONS.filter(c => profile?.allowedCampaigns?.includes(c));
+  useEffect(() => {
+    getActiveCampaigns().then(setActiveCampaigns).catch(console.error);
+  }, []);
+
+  // Filter campaigns: admin sees all active, telecaller sees only their allowed + active
+  const campaignOptions = isAdmin
+    ? activeCampaigns.map(c => c.name)
+    : activeCampaigns.filter(c => profile?.allowedCampaigns?.includes(c.name)).map(c => c.name);
   const serviceOptions = isAdmin 
     ? SERVICE_OPTIONS 
     : SERVICE_OPTIONS.filter(s => profile?.allowedServices?.includes(s));
