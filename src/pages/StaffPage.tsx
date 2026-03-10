@@ -130,6 +130,38 @@ export default function StaffPage() {
     );
   };
 
+  const openEdit = (user: AppUser) => {
+    setEditingUser(user);
+    setEditName(user.displayName);
+    setEditCampaigns(user.allowedCampaigns || []);
+    setEditServices(user.allowedServices || []);
+  };
+
+  const handleSaveEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingUser) return;
+    if (editCampaigns.length === 0) { toast.error('Select at least one campaign'); return; }
+    if (editServices.length === 0) { toast.error('Select at least one service'); return; }
+    setIsSaving(true);
+    try {
+      await updateUserFields(editingUser.uid, {
+        displayName: editName,
+        allowedCampaigns: editCampaigns,
+        allowedServices: editServices,
+      });
+      toast.success('Staff updated successfully');
+      setEditingUser(null);
+      await fetchUsers();
+    } catch (error) {
+      toast.error('Failed to update staff');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const toggleEditCampaign = (c: string) => setEditCampaigns(prev => prev.includes(c) ? prev.filter(x => x !== c) : [...prev, c]);
+  const toggleEditService = (s: string) => setEditServices(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s]);
+
   const admins = users.filter(u => u.role === 'admin');
   const telecallers = users.filter(u => u.role === 'telecaller');
 
