@@ -114,7 +114,7 @@ export default function AddLead() {
                 <Select value={form.campaignSource} onValueChange={v => setForm({ ...form, campaignSource: v as CampaignSource })}>
                   <SelectTrigger><SelectValue placeholder="Select campaign" /></SelectTrigger>
                   <SelectContent>
-                    {CAMPAIGN_OPTIONS.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                    {campaignOptions.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
