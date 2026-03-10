@@ -146,6 +146,7 @@ export default function Dashboard() {
                             <a href={`tel:${l.phoneNumber}`}><Phone className="w-3.5 h-3.5 mr-1" />Call</a>
                           </Button>
                           <UpdateFollowUpDialog lead={l} />
+                          <QuickStatusUpdate lead={l} />
                         </div>
                       </TableCell>
                     </TableRow>
