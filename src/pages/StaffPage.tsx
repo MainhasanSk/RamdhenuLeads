@@ -424,6 +424,137 @@ export default function StaffPage() {
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* View Telecaller Leads Dialog */}
+      <TelecallerLeadsDialog 
+        user={viewingUser} 
+        leads={leads} 
+        onClose={() => setViewingUser(null)} 
+      />
     </div>
+  );
+}
+
+function TelecallerLeadsDialog({ user, leads, onClose }: { user: AppUser | null; leads: any[]; onClose: () => void }) {
+  const monthStart = startOfMonth(new Date());
+  const monthEnd = endOfMonth(new Date());
+
+  const userLeads = useMemo(() => {
+    if (!user) return [];
+    return leads.filter(l => l.createdBy === user.uid);
+  }, [leads, user]);
+
+  const stats = useMemo(() => {
+    const total = userLeads.length;
+    const converted = userLeads.filter(l => l.status === 'Convert').length;
+    const followUp = userLeads.filter(l => l.status === 'Follow Up').length;
+    const cancelled = userLeads.filter(l => l.status === 'Cancel').length;
+    const totalRevenue = userLeads.reduce((sum, l) => sum + (l.amountReceived || 0), 0);
+    const monthlyLeads = userLeads.filter(l => {
+      const d = parseISO(l.updatedAt);
+      return d >= monthStart && d <= monthEnd;
+    });
+    const monthlyRevenue = monthlyLeads
+      .filter(l => l.status === 'Convert')
+      .reduce((sum, l) => sum + (l.amountReceived || 0), 0);
+    const monthlyConverted = monthlyLeads.filter(l => l.status === 'Convert').length;
+    return { total, converted, followUp, cancelled, totalRevenue, monthlyRevenue, monthlyConverted, monthlyLeadsCount: monthlyLeads.length };
+  }, [userLeads, monthStart, monthEnd]);
+
+  if (!user) return null;
+
+  return (
+    <Dialog open={!!user} onOpenChange={open => !open && onClose()}>
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-3xl">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Eye className="w-5 h-5 text-primary" />
+            {user.displayName}'s Performance
+          </DialogTitle>
+        </DialogHeader>
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-2">
+          <div className="rounded-lg border bg-card p-3 text-center">
+            <p className="text-xs text-muted-foreground">Total Leads</p>
+            <p className="text-2xl font-bold">{stats.total}</p>
+          </div>
+          <div className="rounded-lg border bg-card p-3 text-center">
+            <p className="text-xs text-muted-foreground">Converted</p>
+            <p className="text-2xl font-bold text-success">{stats.converted}</p>
+          </div>
+          <div className="rounded-lg border bg-card p-3 text-center">
+            <p className="text-xs text-muted-foreground">Follow Up</p>
+            <p className="text-2xl font-bold text-warning">{stats.followUp}</p>
+          </div>
+          <div className="rounded-lg border bg-card p-3 text-center">
+            <p className="text-xs text-muted-foreground">Cancelled</p>
+            <p className="text-2xl font-bold text-destructive">{stats.cancelled}</p>
+          </div>
+        </div>
+
+        {/* Monthly Revenue */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="rounded-lg border bg-card p-4 flex items-center gap-3">
+            <div className="p-2 rounded-full bg-primary/10">
+              <IndianRupee className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Total Revenue</p>
+              <p className="text-xl font-bold">₹{stats.totalRevenue.toLocaleString('en-IN')}</p>
+            </div>
+          </div>
+          <div className="rounded-lg border bg-card p-4 flex items-center gap-3">
+            <div className="p-2 rounded-full bg-success/10">
+              <TrendingUp className="w-5 h-5 text-success" />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">{format(new Date(), 'MMMM yyyy')} Revenue</p>
+              <p className="text-xl font-bold text-success">₹{stats.monthlyRevenue.toLocaleString('en-IN')}</p>
+              <p className="text-[10px] text-muted-foreground">{stats.monthlyConverted} converted / {stats.monthlyLeadsCount} leads</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Leads Table */}
+        <div className="mt-2">
+          <h3 className="text-sm font-semibold mb-2">All Leads ({userLeads.length})</h3>
+          <div className="overflow-x-auto border rounded-lg max-h-[300px] overflow-y-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="text-xs">Customer</TableHead>
+                  <TableHead className="text-xs">Phone</TableHead>
+                  <TableHead className="text-xs">Service</TableHead>
+                  <TableHead className="text-xs">Status</TableHead>
+                  <TableHead className="text-xs">Amount</TableHead>
+                  <TableHead className="text-xs">Date</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {userLeads.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center text-sm text-muted-foreground py-8">No leads found</TableCell>
+                  </TableRow>
+                ) : userLeads.map(lead => (
+                  <TableRow key={lead.id}>
+                    <TableCell className="text-xs font-medium">{lead.customerName}</TableCell>
+                    <TableCell className="text-xs">{lead.phoneNumber}</TableCell>
+                    <TableCell className="text-xs">{lead.serviceRequired}</TableCell>
+                    <TableCell><StatusBadge status={lead.status} /></TableCell>
+                    <TableCell className="text-xs">
+                      {lead.status === 'Convert' ? `₹${(lead.amountReceived || 0).toLocaleString('en-IN')}` : '-'}
+                    </TableCell>
+                    <TableCell className="text-xs text-muted-foreground">
+                      {format(parseISO(lead.inquiryDate), 'dd MMM yyyy')}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
