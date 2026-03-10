@@ -369,7 +369,54 @@ export default function StaffPage() {
             </Table>
           </div>
         </CardContent>
-      </Card>
+      {/* Edit Dialog */}
+      <Dialog open={!!editingUser} onOpenChange={open => !open && setEditingUser(null)}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Edit Staff: {editingUser?.displayName}</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSaveEdit} className="space-y-4 mt-2">
+            <div>
+              <Label>Display Name *</Label>
+              <Input value={editName} onChange={e => setEditName(e.target.value)} required />
+            </div>
+            <div>
+              <Label className="mb-2 block">Allowed Campaign Sources *</Label>
+              <div className="grid grid-cols-2 gap-2 border rounded-md p-3 bg-muted/30">
+                {dbCampaigns.map(campaign => (
+                  <label key={campaign.id} className="flex items-center gap-2 text-sm cursor-pointer">
+                    <Checkbox
+                      checked={editCampaigns.includes(campaign.name)}
+                      onCheckedChange={() => toggleEditCampaign(campaign.name)}
+                    />
+                    <span className={!campaign.isActive ? 'line-through text-muted-foreground' : ''}>
+                      {campaign.name} {!campaign.isActive && '(stopped)'}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </div>
+            <div>
+              <Label className="mb-2 block">Allowed Services *</Label>
+              <div className="grid grid-cols-2 gap-2 border rounded-md p-3 bg-muted/30">
+                {SERVICE_OPTIONS.map(service => (
+                  <label key={service} className="flex items-center gap-2 text-sm cursor-pointer">
+                    <Checkbox
+                      checked={editServices.includes(service)}
+                      onCheckedChange={() => toggleEditService(service)}
+                    />
+                    {service}
+                  </label>
+                ))}
+              </div>
+            </div>
+            <Button type="submit" className="w-full" disabled={isSaving}>
+              {isSaving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              {isSaving ? 'Saving...' : 'Save Changes'}
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
