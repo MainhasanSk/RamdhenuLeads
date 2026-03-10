@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLeads } from '@/context/LeadContext';
+import { useAuth } from '@/context/AuthContext';
 import { CAMPAIGN_OPTIONS, SERVICE_OPTIONS, CampaignSource, ServiceType, LeadStatus } from '@/types/lead';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -14,7 +15,16 @@ import { UserPlus, Loader2 } from 'lucide-react';
 export default function AddLead() {
   const navigate = useNavigate();
   const { addLead } = useLeads();
+  const { profile, isAdmin } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Filter options based on user's allowed campaigns/services
+  const campaignOptions = isAdmin 
+    ? CAMPAIGN_OPTIONS 
+    : CAMPAIGN_OPTIONS.filter(c => profile?.allowedCampaigns?.includes(c));
+  const serviceOptions = isAdmin 
+    ? SERVICE_OPTIONS 
+    : SERVICE_OPTIONS.filter(s => profile?.allowedServices?.includes(s));
   const [form, setForm] = useState({
     inquiryDate: new Date().toISOString().split('T')[0],
     customerName: '',
@@ -103,7 +113,7 @@ export default function AddLead() {
                 <Select value={form.campaignSource} onValueChange={v => setForm({ ...form, campaignSource: v as CampaignSource })}>
                   <SelectTrigger><SelectValue placeholder="Select campaign" /></SelectTrigger>
                   <SelectContent>
-                    {CAMPAIGN_OPTIONS.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                    {campaignOptions.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
@@ -112,7 +122,7 @@ export default function AddLead() {
                 <Select value={form.serviceRequired} onValueChange={v => setForm({ ...form, serviceRequired: v as ServiceType })}>
                   <SelectTrigger><SelectValue placeholder="Select service" /></SelectTrigger>
                   <SelectContent>
-                    {SERVICE_OPTIONS.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                    {serviceOptions.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
