@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useLeads } from '@/context/LeadContext';
 import { format, isToday, isBefore, startOfDay, startOfMonth, endOfMonth, parseISO } from 'date-fns';
-import { Phone, CalendarClock, TrendingUp, Users, IndianRupee, XCircle, AlertTriangle } from 'lucide-react';
+import { Phone, CalendarClock, TrendingUp, Users, IndianRupee, XCircle, AlertTriangle, MessageCircle } from 'lucide-react';
 import { StatusBadge } from '@/components/StatusBadge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
