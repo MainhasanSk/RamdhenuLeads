@@ -145,8 +145,9 @@ export default function LeadsPage() {
                   <TableHead>Service</TableHead>
                   <TableHead>Follow-up</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>Actions</TableHead>
+                    <TableHead>Amount</TableHead>
+                    {isAdmin && <TableHead>Created By</TableHead>}
+                    <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
