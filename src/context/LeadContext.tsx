@@ -3,6 +3,7 @@ import { Lead } from '@/types/lead';
 import * as leadService from '@/lib/leadService';
 import type { FollowUpEntry } from '@/types/lead';
 import { toast } from 'sonner';
+import { useAuth } from './AuthContext';
 
 interface LeadContextType {
   leads: Lead[];
@@ -19,11 +20,22 @@ const LeadContext = createContext<LeadContextType | null>(null);
 export function LeadProvider({ children }: { children: React.ReactNode }) {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { user, profile, isAdmin } = useAuth();
 
   const refresh = useCallback(async () => {
+    if (!user) {
+      setLeads([]);
+      setIsLoading(false);
+      return;
+    }
     setIsLoading(true);
     try {
-      const data = await leadService.getAllLeads();
+      let data: Lead[];
+      if (isAdmin) {
+        data = await leadService.getAllLeads();
+      } else {
+        data = await leadService.getLeadsByUser(user.uid);
+      }
       setLeads(data);
     } catch (error) {
       console.error('Failed to fetch leads:', error);
@@ -31,7 +43,7 @@ export function LeadProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [user, isAdmin]);
 
   useEffect(() => {
     refresh();
@@ -39,7 +51,11 @@ export function LeadProvider({ children }: { children: React.ReactNode }) {
 
   const handleAdd = useCallback(async (lead: Omit<Lead, 'id' | 'createdAt' | 'updatedAt' | 'followUpHistory'>) => {
     try {
-      const result = await leadService.addLead(lead);
+      const result = await leadService.addLead({
+        ...lead,
+        createdBy: user?.uid || '',
+        createdByName: profile?.displayName || user?.email || '',
+      });
       await refresh();
       toast.success('Lead added successfully');
       return result;
@@ -51,7 +67,7 @@ export function LeadProvider({ children }: { children: React.ReactNode }) {
       toast.error(message);
       throw error;
     }
-  }, [refresh]);
+  }, [refresh, user, profile]);
 
   const handleUpdate = useCallback(async (id: string, updates: Partial<Lead>) => {
     try {

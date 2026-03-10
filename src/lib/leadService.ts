@@ -7,6 +7,7 @@ import {
   doc, 
   query, 
   orderBy,
+  where,
   Timestamp,
   serverTimestamp,
   arrayUnion
@@ -16,19 +17,15 @@ import { Lead, FollowUpEntry } from '@/types/lead';
 
 const LEADS_COLLECTION = 'leads';
 
-// Firestore version 9+ doesn't allow 'undefined' fields.
-// This helper removes any undefined fields from an object.
 const sanitizeData = (data: any) => {
   return Object.fromEntries(
     Object.entries(data).filter(([_, v]) => v !== undefined)
   );
 };
 
-// Helper to convert Firestore data to Lead type
 const mapDocToLead = (id: string, data: any): Lead => ({
   ...data,
   id,
-  // Convert Firestore Timestamp to ISO string if needed
   createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate().toISOString() : data.createdAt,
   updatedAt: data.updatedAt instanceof Timestamp ? data.updatedAt.toDate().toISOString() : data.updatedAt,
 });
@@ -39,7 +36,17 @@ export async function getAllLeads(): Promise<Lead[]> {
   return querySnapshot.docs.map(doc => mapDocToLead(doc.id, doc.data()));
 }
 
-export async function addLead(lead: Omit<Lead, 'id' | 'createdAt' | 'updatedAt' | 'followUpHistory'>): Promise<Lead> {
+export async function getLeadsByUser(userId: string): Promise<Lead[]> {
+  const q = query(
+    collection(db, LEADS_COLLECTION), 
+    where('createdBy', '==', userId),
+    orderBy('updatedAt', 'desc')
+  );
+  const querySnapshot = await getDocs(q);
+  return querySnapshot.docs.map(doc => mapDocToLead(doc.id, doc.data()));
+}
+
+export async function addLead(lead: Omit<Lead, 'id' | 'createdAt' | 'updatedAt' | 'followUpHistory'> & { createdBy: string; createdByName: string }): Promise<Lead> {
   const newLeadData = {
     ...lead,
     followUpHistory: [],
