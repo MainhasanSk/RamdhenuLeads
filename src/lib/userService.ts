@@ -82,6 +82,10 @@ export async function toggleUserActive(uid: string, isActive: boolean): Promise<
   await setDoc(doc(db, USERS_COLLECTION, uid), { isActive }, { merge: true });
 }
 
+export async function updateUserFields(uid: string, fields: Partial<Pick<AppUser, 'displayName' | 'allowedCampaigns' | 'allowedServices'>>): Promise<void> {
+  await setDoc(doc(db, USERS_COLLECTION, uid), fields, { merge: true });
+}
+
 export async function deleteUserProfile(uid: string): Promise<void> {
   await deleteDoc(doc(db, USERS_COLLECTION, uid));
 }
