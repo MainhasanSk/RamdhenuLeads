@@ -19,6 +19,8 @@ export interface AppUser {
   role: UserRole;
   createdAt: string;
   isActive: boolean;
+  allowedCampaigns?: string[];
+  allowedServices?: string[];
 }
 
 export async function getUserProfile(uid: string): Promise<AppUser | null> {
