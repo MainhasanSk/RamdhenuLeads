@@ -123,7 +123,7 @@ export default function AddLead() {
                 <Select value={form.serviceRequired} onValueChange={v => setForm({ ...form, serviceRequired: v as ServiceType })}>
                   <SelectTrigger><SelectValue placeholder="Select service" /></SelectTrigger>
                   <SelectContent>
-                    {SERVICE_OPTIONS.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                    {serviceOptions.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
