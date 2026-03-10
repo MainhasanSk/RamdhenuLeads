@@ -369,6 +369,8 @@ export default function StaffPage() {
             </Table>
           </div>
         </CardContent>
+      </Card>
+
       {/* Edit Dialog */}
       <Dialog open={!!editingUser} onOpenChange={open => !open && setEditingUser(null)}>
         <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
