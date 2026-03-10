@@ -197,6 +197,11 @@ export default function Dashboard() {
                           <Button size="sm" variant="outline" asChild>
                             <a href={`tel:${l.phoneNumber}`}><Phone className="w-3.5 h-3.5 mr-1" />Call</a>
                           </Button>
+                          <Button size="sm" variant="outline" className="text-success border-success/30 hover:bg-success/10" asChild>
+                            <a href={`https://wa.me/${l.phoneNumber.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer">
+                              <MessageCircle className="w-3.5 h-3.5 mr-1" />WA
+                            </a>
+                          </Button>
                           <UpdateFollowUpDialog lead={l} />
                         </div>
                       </TableCell>
