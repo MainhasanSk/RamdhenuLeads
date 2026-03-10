@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { useLeads } from '@/context/LeadContext';
 import { getAllUsers, createTelecallerAccount, toggleUserActive, deleteUserProfile, updateUserFields, type AppUser } from '@/lib/userService';
 import { SERVICE_OPTIONS } from '@/types/lead';
 import { getAllCampaigns, type Campaign } from '@/lib/campaignService';
@@ -11,9 +12,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
+import { StatusBadge } from '@/components/StatusBadge';
 import { toast } from 'sonner';
-import { UserPlus, Trash2, Loader2, Users, ShieldCheck, ToggleLeft, ToggleRight, Pencil } from 'lucide-react';
+import { UserPlus, Trash2, Loader2, Users, ShieldCheck, ToggleLeft, ToggleRight, Pencil, Eye, IndianRupee, TrendingUp } from 'lucide-react';
 import { Navigate } from 'react-router-dom';
+import { startOfMonth, endOfMonth, parseISO, format } from 'date-fns';
 
 export default function StaffPage() {
   const { isAdmin } = useAuth();
