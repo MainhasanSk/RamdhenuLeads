@@ -16,8 +16,7 @@ export default function AddLead() {
   const navigate = useNavigate();
   const { addLead } = useLeads();
   const { profile, isAdmin } = useAuth();
-  const isSubmittingState = useState(false);
-  const [isSubmitting, setIsSubmitting] = isSubmittingState;
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Filter options based on user's allowed campaigns/services
   const campaignOptions = isAdmin 
