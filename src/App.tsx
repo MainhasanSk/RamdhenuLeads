@@ -11,6 +11,7 @@ import Dashboard from "@/pages/Dashboard";
 import AddLead from "@/pages/AddLead";
 import LeadsPage from "@/pages/LeadsPage";
 import ReportsPage from "@/pages/ReportsPage";
+import StaffPage from "@/pages/StaffPage";
 import LoginPage from "@/pages/Login";
 import NotFound from "./pages/NotFound";
 
@@ -36,6 +37,7 @@ const App = () => (
                         <Route path="/add-lead" element={<AddLead />} />
                         <Route path="/leads" element={<LeadsPage />} />
                         <Route path="/reports" element={<ReportsPage />} />
+                        <Route path="/staff" element={<StaffPage />} />
                         <Route path="*" element={<NotFound />} />
                       </Routes>
                     </AppLayout>

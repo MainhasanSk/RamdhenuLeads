@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useLeads } from '@/context/LeadContext';
+import { useAuth } from '@/context/AuthContext';
 import { CAMPAIGN_OPTIONS, SERVICE_OPTIONS, CampaignSource, ServiceType, LeadStatus, Lead } from '@/types/lead';
 import { StatusBadge } from '@/components/StatusBadge';
 import { UpdateFollowUpDialog } from '@/components/UpdateFollowUpDialog';
@@ -19,6 +20,7 @@ import { FollowUpTimeline } from '@/components/FollowUpTimeline';
 
 export default function LeadsPage() {
   const { leads, updateLead, deleteLead, isLoading } = useLeads();
+  const { isAdmin } = useAuth();
   const [search, setSearch] = useState('');
   const [filterCampaign, setFilterCampaign] = useState<string>('all');
   const [filterService, setFilterService] = useState<string>('all');
@@ -143,8 +145,9 @@ export default function LeadsPage() {
                   <TableHead>Service</TableHead>
                   <TableHead>Follow-up</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>Actions</TableHead>
+                    <TableHead>Amount</TableHead>
+                    {isAdmin && <TableHead>Created By</TableHead>}
+                    <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -153,7 +156,7 @@ export default function LeadsPage() {
                     <TableCell colSpan={9} className="text-center py-12">
                       <div className="flex flex-col items-center gap-2">
                         <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                        <p className="text-sm text-muted-foreground">Loading leads from Firebase...</p>
+                        <p className="text-sm text-muted-foreground">Loading leads...</p>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -175,6 +178,7 @@ export default function LeadsPage() {
                     <TableCell className="text-sm">{format(parseISO(l.nextFollowUpDate), 'dd MMM')}</TableCell>
                     <TableCell><StatusBadge status={l.status} /></TableCell>
                     <TableCell>{l.amountReceived ? `₹${l.amountReceived.toLocaleString('en-IN')}` : '—'}</TableCell>
+                    {isAdmin && <TableCell className="text-sm text-muted-foreground">{l.createdByName || '—'}</TableCell>}
                     <TableCell>
                       <div className="flex gap-1">
                         <Button size="icon" variant="ghost" onClick={() => handleEdit(l)} title="Edit">

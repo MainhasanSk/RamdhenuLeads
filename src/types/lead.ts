@@ -41,6 +41,8 @@ export interface Lead {
   amountReceived?: number;
   cancelReason?: string;
   followUpHistory: FollowUpEntry[];
+  createdBy?: string;
+  createdByName?: string;
   createdAt: string;
   updatedAt: string;
 }

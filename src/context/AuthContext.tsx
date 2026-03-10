@@ -3,13 +3,15 @@ import {
   User, 
   onAuthStateChanged, 
   signOut,
-  signInWithEmailAndPassword
 } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
+import { getUserProfile, setUserProfile, type AppUser, type UserRole } from '@/lib/userService';
 
 interface AuthContextType {
   user: User | null;
+  profile: AppUser | null;
   isLoading: boolean;
+  isAdmin: boolean;
   logout: () => Promise<void>;
 }
 
@@ -17,11 +19,35 @@ const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<AppUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      setUser(firebaseUser);
+      if (firebaseUser) {
+        try {
+          let userProfile = await getUserProfile(firebaseUser.uid);
+          // Auto-create admin profile for first user or if no profile exists
+          if (!userProfile) {
+            const newProfile = {
+              email: firebaseUser.email || '',
+              displayName: firebaseUser.email?.split('@')[0] || 'Admin',
+              role: 'admin' as UserRole,
+              createdAt: new Date().toISOString(),
+              isActive: true,
+            };
+            await setUserProfile(firebaseUser.uid, newProfile);
+            userProfile = { uid: firebaseUser.uid, ...newProfile };
+          }
+          setProfile(userProfile);
+        } catch (error) {
+          console.error('Failed to load user profile:', error);
+          setProfile(null);
+        }
+      } else {
+        setProfile(null);
+      }
       setIsLoading(false);
     });
 
@@ -37,8 +63,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const isAdmin = profile?.role === 'admin';
+
   return (
-    <AuthContext.Provider value={{ user, isLoading, logout }}>
+    <AuthContext.Provider value={{ user, profile, isLoading, isAdmin, logout }}>
       {children}
     </AuthContext.Provider>
   );
