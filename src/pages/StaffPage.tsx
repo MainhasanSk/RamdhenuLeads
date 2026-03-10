@@ -182,13 +182,15 @@ export default function StaffPage() {
               <div>
                 <Label className="mb-2 block">Allowed Campaign Sources *</Label>
                 <div className="grid grid-cols-2 gap-2 border rounded-md p-3 bg-muted/30">
-                  {CAMPAIGN_OPTIONS.map(campaign => (
-                    <label key={campaign} className="flex items-center gap-2 text-sm cursor-pointer">
+                  {dbCampaigns.map(campaign => (
+                    <label key={campaign.id} className="flex items-center gap-2 text-sm cursor-pointer">
                       <Checkbox
-                        checked={selectedCampaigns.includes(campaign)}
-                        onCheckedChange={() => toggleCampaign(campaign)}
+                        checked={selectedCampaigns.includes(campaign.name)}
+                        onCheckedChange={() => toggleCampaign(campaign.name)}
                       />
-                      {campaign}
+                      <span className={!campaign.isActive ? 'line-through text-muted-foreground' : ''}>
+                        {campaign.name} {!campaign.isActive && '(stopped)'}
+                      </span>
                     </label>
                   ))}
                 </div>
