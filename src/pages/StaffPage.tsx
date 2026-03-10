@@ -20,6 +20,7 @@ import { startOfMonth, endOfMonth, parseISO, format } from 'date-fns';
 
 export default function StaffPage() {
   const { isAdmin } = useAuth();
+  const { leads } = useLeads();
   const [users, setUsers] = useState<AppUser[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
