@@ -41,6 +41,7 @@ export default function StaffPage() {
 
   useEffect(() => {
     fetchUsers();
+    getAllCampaigns().then(setDbCampaigns).catch(console.error);
   }, []);
 
   if (!isAdmin) {
