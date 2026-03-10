@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { getAllUsers, createTelecallerAccount, toggleUserActive, deleteUserProfile, type AppUser } from '@/lib/userService';
+import { getAllUsers, createTelecallerAccount, toggleUserActive, deleteUserProfile, updateUserFields, type AppUser } from '@/lib/userService';
 import { SERVICE_OPTIONS } from '@/types/lead';
 import { getAllCampaigns, type Campaign } from '@/lib/campaignService';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,7 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
-import { UserPlus, Trash2, Loader2, Users, ShieldCheck, ToggleLeft, ToggleRight } from 'lucide-react';
+import { UserPlus, Trash2, Loader2, Users, ShieldCheck, ToggleLeft, ToggleRight, Pencil } from 'lucide-react';
 import { Navigate } from 'react-router-dom';
 
 export default function StaffPage() {
@@ -25,6 +25,11 @@ export default function StaffPage() {
   const [selectedCampaigns, setSelectedCampaigns] = useState<string[]>([]);
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [dbCampaigns, setDbCampaigns] = useState<Campaign[]>([]);
+  const [editingUser, setEditingUser] = useState<AppUser | null>(null);
+  const [editName, setEditName] = useState('');
+  const [editCampaigns, setEditCampaigns] = useState<string[]>([]);
+  const [editServices, setEditServices] = useState<string[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
 
   const fetchUsers = async () => {
     setIsLoading(true);
@@ -124,6 +129,38 @@ export default function StaffPage() {
       prev.includes(service) ? prev.filter(s => s !== service) : [...prev, service]
     );
   };
+
+  const openEdit = (user: AppUser) => {
+    setEditingUser(user);
+    setEditName(user.displayName);
+    setEditCampaigns(user.allowedCampaigns || []);
+    setEditServices(user.allowedServices || []);
+  };
+
+  const handleSaveEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingUser) return;
+    if (editCampaigns.length === 0) { toast.error('Select at least one campaign'); return; }
+    if (editServices.length === 0) { toast.error('Select at least one service'); return; }
+    setIsSaving(true);
+    try {
+      await updateUserFields(editingUser.uid, {
+        displayName: editName,
+        allowedCampaigns: editCampaigns,
+        allowedServices: editServices,
+      });
+      toast.success('Staff updated successfully');
+      setEditingUser(null);
+      await fetchUsers();
+    } catch (error) {
+      toast.error('Failed to update staff');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const toggleEditCampaign = (c: string) => setEditCampaigns(prev => prev.includes(c) ? prev.filter(x => x !== c) : [...prev, c]);
+  const toggleEditService = (s: string) => setEditServices(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s]);
 
   const admins = users.filter(u => u.role === 'admin');
   const telecallers = users.filter(u => u.role === 'telecaller');
@@ -296,8 +333,16 @@ export default function StaffPage() {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      {u.role !== 'admin' && (
+                    {u.role !== 'admin' && (
                         <div className="flex gap-1">
+                          <Button 
+                            size="icon" 
+                            variant="ghost" 
+                            onClick={() => openEdit(u)} 
+                            title="Edit"
+                          >
+                            <Pencil className="w-4 h-4 text-primary" />
+                          </Button>
                           <Button 
                             size="icon" 
                             variant="ghost" 
@@ -325,6 +370,55 @@ export default function StaffPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Edit Dialog */}
+      <Dialog open={!!editingUser} onOpenChange={open => !open && setEditingUser(null)}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Edit Staff: {editingUser?.displayName}</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSaveEdit} className="space-y-4 mt-2">
+            <div>
+              <Label>Display Name *</Label>
+              <Input value={editName} onChange={e => setEditName(e.target.value)} required />
+            </div>
+            <div>
+              <Label className="mb-2 block">Allowed Campaign Sources *</Label>
+              <div className="grid grid-cols-2 gap-2 border rounded-md p-3 bg-muted/30">
+                {dbCampaigns.map(campaign => (
+                  <label key={campaign.id} className="flex items-center gap-2 text-sm cursor-pointer">
+                    <Checkbox
+                      checked={editCampaigns.includes(campaign.name)}
+                      onCheckedChange={() => toggleEditCampaign(campaign.name)}
+                    />
+                    <span className={!campaign.isActive ? 'line-through text-muted-foreground' : ''}>
+                      {campaign.name} {!campaign.isActive && '(stopped)'}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </div>
+            <div>
+              <Label className="mb-2 block">Allowed Services *</Label>
+              <div className="grid grid-cols-2 gap-2 border rounded-md p-3 bg-muted/30">
+                {SERVICE_OPTIONS.map(service => (
+                  <label key={service} className="flex items-center gap-2 text-sm cursor-pointer">
+                    <Checkbox
+                      checked={editServices.includes(service)}
+                      onCheckedChange={() => toggleEditService(service)}
+                    />
+                    {service}
+                  </label>
+                ))}
+              </div>
+            </div>
+            <Button type="submit" className="w-full" disabled={isSaving}>
+              {isSaving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              {isSaving ? 'Saving...' : 'Save Changes'}
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
