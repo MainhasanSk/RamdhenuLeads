@@ -333,8 +333,16 @@ export default function StaffPage() {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      {u.role !== 'admin' && (
+                    {u.role !== 'admin' && (
                         <div className="flex gap-1">
+                          <Button 
+                            size="icon" 
+                            variant="ghost" 
+                            onClick={() => openEdit(u)} 
+                            title="Edit"
+                          >
+                            <Pencil className="w-4 h-4 text-primary" />
+                          </Button>
                           <Button 
                             size="icon" 
                             variant="ghost" 
