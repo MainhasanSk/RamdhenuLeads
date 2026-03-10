@@ -34,6 +34,7 @@ export default function StaffPage() {
   const [editCampaigns, setEditCampaigns] = useState<string[]>([]);
   const [editServices, setEditServices] = useState<string[]>([]);
   const [isSaving, setIsSaving] = useState(false);
+  const [viewingUser, setViewingUser] = useState<AppUser | null>(null);
 
   const fetchUsers = async () => {
     setIsLoading(true);
