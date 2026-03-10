@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, UserPlus, Users, BarChart3, Menu, X, Zap } from 'lucide-react';
+import { LayoutDashboard, UserPlus, Users, BarChart3, Menu, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import logo from '@/assets/logo.png';
 
 const navItems = [
   { label: 'Dashboard', icon: LayoutDashboard, path: '/' },
