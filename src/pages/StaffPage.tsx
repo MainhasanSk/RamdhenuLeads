@@ -24,6 +24,7 @@ export default function StaffPage() {
   const [form, setForm] = useState({ email: '', password: '', displayName: '' });
   const [selectedCampaigns, setSelectedCampaigns] = useState<string[]>([]);
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
+  const [dbCampaigns, setDbCampaigns] = useState<Campaign[]>([]);
 
   const fetchUsers = async () => {
     setIsLoading(true);
