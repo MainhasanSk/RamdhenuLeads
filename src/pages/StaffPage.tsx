@@ -20,10 +20,6 @@ export default function StaffPage() {
   const [showDialog, setShowDialog] = useState(false);
   const [form, setForm] = useState({ email: '', password: '', displayName: '' });
 
-  if (!isAdmin) {
-    return <Navigate to="/" replace />;
-  }
-
   const fetchUsers = async () => {
     setIsLoading(true);
     try {
@@ -40,6 +36,10 @@ export default function StaffPage() {
   useEffect(() => {
     fetchUsers();
   }, []);
+
+  if (!isAdmin) {
+    return <Navigate to="/" replace />;
+  }
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();

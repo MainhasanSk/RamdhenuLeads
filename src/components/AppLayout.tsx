@@ -1,21 +1,28 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, UserPlus, Users, BarChart3, Menu, X, LogOut } from 'lucide-react';
+import { LayoutDashboard, UserPlus, Users, BarChart3, Menu, X, LogOut, UsersRound } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/context/AuthContext';
 import logo from '@/assets/logo.png';
 
-const navItems = [
-  { label: 'Dashboard', icon: LayoutDashboard, path: '/' },
-  { label: 'Add Lead', icon: UserPlus, path: '/add-lead' },
-  { label: 'Leads', icon: Users, path: '/leads' },
-  { label: 'Reports', icon: BarChart3, path: '/reports' },
-];
+const getNavItems = (isAdmin: boolean) => {
+  const items = [
+    { label: 'Dashboard', icon: LayoutDashboard, path: '/' },
+    { label: 'Add Lead', icon: UserPlus, path: '/add-lead' },
+    { label: 'Leads', icon: Users, path: '/leads' },
+    { label: 'Reports', icon: BarChart3, path: '/reports' },
+  ];
+  if (isAdmin) {
+    items.push({ label: 'Staff', icon: UsersRound, path: '/staff' });
+  }
+  return items;
+};
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
-  const { logout, user } = useAuth();
+  const { logout, user, profile, isAdmin } = useAuth();
+  const navItems = getNavItems(isAdmin);
 
   return (
     <div className="min-h-screen flex bg-background">
@@ -89,8 +96,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           <div className="flex-1" />
           <div className="flex items-center gap-3">
             <div className="hidden sm:flex flex-col items-end text-right">
-              <span className="text-xs font-medium text-foreground">{user?.email}</span>
-              <span className="text-[10px] text-muted-foreground uppercase">Administrator</span>
+              <span className="text-xs font-medium text-foreground">{profile?.displayName || user?.email}</span>
+              <span className="text-[10px] text-muted-foreground uppercase">{profile?.role || 'User'}</span>
             </div>
             <img src={logo} alt="User" className="w-9 h-9 rounded-full border border-border shadow-sm object-cover" />
           </div>
