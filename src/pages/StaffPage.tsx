@@ -12,7 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
-import { UserPlus, Trash2, Loader2, Users, ShieldCheck, ToggleLeft, ToggleRight } from 'lucide-react';
+import { UserPlus, Trash2, Loader2, Users, ShieldCheck, ToggleLeft, ToggleRight, Pencil } from 'lucide-react';
 import { Navigate } from 'react-router-dom';
 
 export default function StaffPage() {
