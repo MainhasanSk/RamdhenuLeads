@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { UpdateFollowUpDialog } from '@/components/UpdateFollowUpDialog';
+import { QuickStatusUpdate } from '@/components/QuickStatusUpdate';
 
 export default function Dashboard() {
   const { leads } = useLeads();
@@ -145,6 +146,7 @@ export default function Dashboard() {
                             <a href={`tel:${l.phoneNumber}`}><Phone className="w-3.5 h-3.5 mr-1" />Call</a>
                           </Button>
                           <UpdateFollowUpDialog lead={l} />
+                          <QuickStatusUpdate lead={l} />
                         </div>
                       </TableCell>
                     </TableRow>
