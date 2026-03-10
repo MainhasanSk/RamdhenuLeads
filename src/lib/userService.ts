@@ -39,7 +39,9 @@ export async function getAllUsers(): Promise<AppUser[]> {
 export async function createTelecallerAccount(
   email: string, 
   password: string, 
-  displayName: string
+  displayName: string,
+  allowedCampaigns: string[] = [],
+  allowedServices: string[] = []
 ): Promise<AppUser> {
   // Use a secondary Firebase app to create the user without signing out admin
   const { app } = await import('./firebase');
@@ -55,6 +57,8 @@ export async function createTelecallerAccount(
       role: 'telecaller',
       createdAt: new Date().toISOString(),
       isActive: true,
+      allowedCampaigns,
+      allowedServices,
     };
     
     await setDoc(doc(db, USERS_COLLECTION, cred.user.uid), newUser);

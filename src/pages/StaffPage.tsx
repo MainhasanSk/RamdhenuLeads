@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { getAllUsers, createTelecallerAccount, toggleUserActive, deleteUserProfile, type AppUser } from '@/lib/userService';
+import { CAMPAIGN_OPTIONS, SERVICE_OPTIONS } from '@/types/lead';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,8 +9,9 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
-import { UserPlus, Trash2, Loader2, Users, ShieldCheck, Phone as PhoneIcon, ToggleLeft, ToggleRight } from 'lucide-react';
+import { UserPlus, Trash2, Loader2, Users, ShieldCheck, ToggleLeft, ToggleRight } from 'lucide-react';
 import { Navigate } from 'react-router-dom';
 
 export default function StaffPage() {
@@ -19,6 +21,8 @@ export default function StaffPage() {
   const [isCreating, setIsCreating] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
   const [form, setForm] = useState({ email: '', password: '', displayName: '' });
+  const [selectedCampaigns, setSelectedCampaigns] = useState<string[]>([]);
+  const [selectedServices, setSelectedServices] = useState<string[]>([]);
 
   const fetchUsers = async () => {
     setIsLoading(true);
@@ -51,12 +55,22 @@ export default function StaffPage() {
       toast.error('Password must be at least 6 characters');
       return;
     }
+    if (selectedCampaigns.length === 0) {
+      toast.error('Please select at least one campaign source');
+      return;
+    }
+    if (selectedServices.length === 0) {
+      toast.error('Please select at least one service');
+      return;
+    }
 
     setIsCreating(true);
     try {
-      await createTelecallerAccount(form.email, form.password, form.displayName);
+      await createTelecallerAccount(form.email, form.password, form.displayName, selectedCampaigns, selectedServices);
       toast.success('Telecaller account created successfully');
       setForm({ email: '', password: '', displayName: '' });
+      setSelectedCampaigns([]);
+      setSelectedServices([]);
       setShowDialog(false);
       await fetchUsers();
     } catch (error: any) {
@@ -96,6 +110,18 @@ export default function StaffPage() {
     }
   };
 
+  const toggleCampaign = (campaign: string) => {
+    setSelectedCampaigns(prev =>
+      prev.includes(campaign) ? prev.filter(c => c !== campaign) : [...prev, campaign]
+    );
+  };
+
+  const toggleService = (service: string) => {
+    setSelectedServices(prev =>
+      prev.includes(service) ? prev.filter(s => s !== service) : [...prev, service]
+    );
+  };
+
   const admins = users.filter(u => u.role === 'admin');
   const telecallers = users.filter(u => u.role === 'telecaller');
 
@@ -114,7 +140,7 @@ export default function StaffPage() {
               <UserPlus className="w-4 h-4 mr-2" /> Add Telecaller
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
             <DialogHeader>
               <DialogTitle>Create Telecaller Account</DialogTitle>
             </DialogHeader>
@@ -149,6 +175,37 @@ export default function StaffPage() {
                   minLength={6}
                 />
               </div>
+
+              <div>
+                <Label className="mb-2 block">Allowed Campaign Sources *</Label>
+                <div className="grid grid-cols-2 gap-2 border rounded-md p-3 bg-muted/30">
+                  {CAMPAIGN_OPTIONS.map(campaign => (
+                    <label key={campaign} className="flex items-center gap-2 text-sm cursor-pointer">
+                      <Checkbox
+                        checked={selectedCampaigns.includes(campaign)}
+                        onCheckedChange={() => toggleCampaign(campaign)}
+                      />
+                      {campaign}
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <Label className="mb-2 block">Allowed Services *</Label>
+                <div className="grid grid-cols-2 gap-2 border rounded-md p-3 bg-muted/30">
+                  {SERVICE_OPTIONS.map(service => (
+                    <label key={service} className="flex items-center gap-2 text-sm cursor-pointer">
+                      <Checkbox
+                        checked={selectedServices.includes(service)}
+                        onCheckedChange={() => toggleService(service)}
+                      />
+                      {service}
+                    </label>
+                  ))}
+                </div>
+              </div>
+
               <Button type="submit" className="w-full" disabled={isCreating}>
                 {isCreating && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                 {isCreating ? 'Creating...' : 'Create Account'}
@@ -172,15 +229,16 @@ export default function StaffPage() {
                   <TableHead>Name</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Role</TableHead>
+                  <TableHead>Campaigns</TableHead>
+                  <TableHead>Services</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Joined</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {isLoading ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-12">
+                    <TableCell colSpan={7} className="text-center py-12">
                       <div className="flex flex-col items-center gap-2">
                         <Loader2 className="w-8 h-8 animate-spin text-primary" />
                         <p className="text-sm text-muted-foreground">Loading staff...</p>
@@ -189,7 +247,7 @@ export default function StaffPage() {
                   </TableRow>
                 ) : users.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">No staff found</TableCell>
+                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">No staff found</TableCell>
                   </TableRow>
                 ) : users.map(u => (
                   <TableRow key={u.uid}>
@@ -202,12 +260,35 @@ export default function StaffPage() {
                       </Badge>
                     </TableCell>
                     <TableCell>
+                      <div className="flex flex-wrap gap-1 max-w-[200px]">
+                        {u.role === 'admin' ? (
+                          <span className="text-xs text-muted-foreground">All</span>
+                        ) : (u.allowedCampaigns || []).length > 0 ? (
+                          (u.allowedCampaigns || []).map(c => (
+                            <Badge key={c} variant="outline" className="text-[10px] px-1.5 py-0">{c}</Badge>
+                          ))
+                        ) : (
+                          <span className="text-xs text-muted-foreground">None</span>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap gap-1 max-w-[200px]">
+                        {u.role === 'admin' ? (
+                          <span className="text-xs text-muted-foreground">All</span>
+                        ) : (u.allowedServices || []).length > 0 ? (
+                          (u.allowedServices || []).map(s => (
+                            <Badge key={s} variant="outline" className="text-[10px] px-1.5 py-0">{s}</Badge>
+                          ))
+                        ) : (
+                          <span className="text-xs text-muted-foreground">None</span>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
                       <Badge variant={u.isActive ? 'outline' : 'destructive'} className="text-xs">
                         {u.isActive ? 'Active' : 'Inactive'}
                       </Badge>
-                    </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {new Date(u.createdAt).toLocaleDateString()}
                     </TableCell>
                     <TableCell>
                       {u.role !== 'admin' && (

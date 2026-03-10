@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLeads } from '@/context/LeadContext';
+import { useAuth } from '@/context/AuthContext';
 import { CAMPAIGN_OPTIONS, SERVICE_OPTIONS, CampaignSource, ServiceType, LeadStatus } from '@/types/lead';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
