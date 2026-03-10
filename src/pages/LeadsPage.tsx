@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useLeads } from '@/context/LeadContext';
+import { useAuth } from '@/context/AuthContext';
 import { CAMPAIGN_OPTIONS, SERVICE_OPTIONS, CampaignSource, ServiceType, LeadStatus, Lead } from '@/types/lead';
 import { StatusBadge } from '@/components/StatusBadge';
 import { UpdateFollowUpDialog } from '@/components/UpdateFollowUpDialog';
