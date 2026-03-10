@@ -13,6 +13,7 @@ const getNavItems = (isAdmin: boolean) => {
     { label: 'Reports', icon: BarChart3, path: '/reports' },
   ];
   if (isAdmin) {
+    items.push({ label: 'Campaigns', icon: Megaphone, path: '/campaigns' });
     items.push({ label: 'Staff', icon: UsersRound, path: '/staff' });
   }
   return items;
