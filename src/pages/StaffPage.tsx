@@ -343,6 +343,14 @@ export default function StaffPage() {
                           <Button 
                             size="icon" 
                             variant="ghost" 
+                            onClick={() => setViewingUser(u)} 
+                            title="View Leads"
+                          >
+                            <Eye className="w-4 h-4 text-muted-foreground" />
+                          </Button>
+                          <Button 
+                            size="icon" 
+                            variant="ghost" 
                             onClick={() => openEdit(u)} 
                             title="Edit"
                           >
