@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useLeads } from '@/context/LeadContext';
 import { format, isToday, isBefore, startOfDay, startOfMonth, endOfMonth, parseISO } from 'date-fns';
-import { Phone, CalendarClock, TrendingUp, Users, IndianRupee, XCircle, AlertTriangle } from 'lucide-react';
+import { Phone, CalendarClock, TrendingUp, Users, IndianRupee, XCircle, AlertTriangle, MessageCircle } from 'lucide-react';
 import { StatusBadge } from '@/components/StatusBadge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -145,6 +145,11 @@ export default function Dashboard() {
                           <Button size="sm" variant="outline" asChild>
                             <a href={`tel:${l.phoneNumber}`}><Phone className="w-3.5 h-3.5 mr-1" />Call</a>
                           </Button>
+                          <Button size="sm" variant="outline" className="text-success border-success/30 hover:bg-success/10" asChild>
+                            <a href={`https://wa.me/${l.phoneNumber.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer">
+                              <MessageCircle className="w-3.5 h-3.5 mr-1" />WA
+                            </a>
+                          </Button>
                           <UpdateFollowUpDialog lead={l} />
                           <QuickStatusUpdate lead={l} />
                         </div>
@@ -191,6 +196,11 @@ export default function Dashboard() {
                         <div className="flex gap-2">
                           <Button size="sm" variant="outline" asChild>
                             <a href={`tel:${l.phoneNumber}`}><Phone className="w-3.5 h-3.5 mr-1" />Call</a>
+                          </Button>
+                          <Button size="sm" variant="outline" className="text-success border-success/30 hover:bg-success/10" asChild>
+                            <a href={`https://wa.me/${l.phoneNumber.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer">
+                              <MessageCircle className="w-3.5 h-3.5 mr-1" />WA
+                            </a>
                           </Button>
                           <UpdateFollowUpDialog lead={l} />
                         </div>
