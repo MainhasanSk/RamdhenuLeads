@@ -178,6 +178,7 @@ export default function LeadsPage() {
                     <TableCell className="text-sm">{format(parseISO(l.nextFollowUpDate), 'dd MMM')}</TableCell>
                     <TableCell><StatusBadge status={l.status} /></TableCell>
                     <TableCell>{l.amountReceived ? `₹${l.amountReceived.toLocaleString('en-IN')}` : '—'}</TableCell>
+                    {isAdmin && <TableCell className="text-sm text-muted-foreground">{l.createdByName || '—'}</TableCell>}
                     <TableCell>
                       <div className="flex gap-1">
                         <Button size="icon" variant="ghost" onClick={() => handleEdit(l)} title="Edit">
