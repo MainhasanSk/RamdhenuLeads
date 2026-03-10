@@ -15,7 +15,17 @@ import { UserPlus, Loader2 } from 'lucide-react';
 export default function AddLead() {
   const navigate = useNavigate();
   const { addLead } = useLeads();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { profile, isAdmin } = useAuth();
+  const isSubmittingState = useState(false);
+  const [isSubmitting, setIsSubmitting] = isSubmittingState;
+
+  // Filter options based on user's allowed campaigns/services
+  const campaignOptions = isAdmin 
+    ? CAMPAIGN_OPTIONS 
+    : CAMPAIGN_OPTIONS.filter(c => profile?.allowedCampaigns?.includes(c));
+  const serviceOptions = isAdmin 
+    ? SERVICE_OPTIONS 
+    : SERVICE_OPTIONS.filter(s => profile?.allowedServices?.includes(s));
   const [form, setForm] = useState({
     inquiryDate: new Date().toISOString().split('T')[0],
     customerName: '',
