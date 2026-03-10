@@ -21,6 +21,7 @@ import { FollowUpTimeline } from '@/components/FollowUpTimeline';
 export default function LeadsPage() {
   const { leads, updateLead, deleteLead, isLoading } = useLeads();
   const { isAdmin } = useAuth();
+  const [search, setSearch] = useState('');
   const [filterCampaign, setFilterCampaign] = useState<string>('all');
   const [filterService, setFilterService] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
