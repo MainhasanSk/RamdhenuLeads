@@ -77,9 +77,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             <Menu className="w-5 h-5" />
           </button>
           <div className="flex-1" />
-          <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-xs font-semibold">
-            JD
-          </div>
+          <img src={logo} alt="Junak Digital Dynamics" className="w-8 h-8 rounded-full object-cover" />
         </header>
         <main className="flex-1 p-4 lg:p-8 overflow-auto">
           {children}
