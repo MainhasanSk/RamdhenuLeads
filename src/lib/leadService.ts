@@ -39,11 +39,12 @@ export async function getAllLeads(): Promise<Lead[]> {
 export async function getLeadsByUser(userId: string): Promise<Lead[]> {
   const q = query(
     collection(db, LEADS_COLLECTION), 
-    where('createdBy', '==', userId),
-    orderBy('updatedAt', 'desc')
+    where('createdBy', '==', userId)
   );
   const querySnapshot = await getDocs(q);
-  return querySnapshot.docs.map(doc => mapDocToLead(doc.id, doc.data()));
+  return querySnapshot.docs
+    .map(doc => mapDocToLead(doc.id, doc.data()))
+    .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
 }
 
 export async function addLead(lead: Omit<Lead, 'id' | 'createdAt' | 'updatedAt' | 'followUpHistory'> & { createdBy: string; createdByName: string }): Promise<Lead> {
