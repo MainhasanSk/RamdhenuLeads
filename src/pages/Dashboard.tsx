@@ -35,9 +35,18 @@ export default function Dashboard() {
     [leads, monthStart, monthEnd]
   );
 
+  const campaignRevenue = useMemo(() => {
+    const map: Record<string, number> = {};
+    monthlyConverted.forEach(l => {
+      const c = l.campaignSource || 'Other';
+      map[c] = (map[c] || 0) + (l.amountReceived || 0);
+    });
+    return Object.entries(map).sort((a, b) => b[1] - a[1]);
+  }, [monthlyConverted]);
+
   const totalRevenue = useMemo(() =>
-    monthlyConverted.reduce((s, l) => s + (l.amountReceived || 0), 0),
-    [monthlyConverted]
+    campaignRevenue.reduce((s, [_, r]) => s + r, 0),
+    [campaignRevenue]
   );
 
   const cancelledLeads = useMemo(() =>
@@ -110,11 +119,28 @@ export default function Dashboard() {
           <p className="text-3xl font-bold mt-2">{monthlyConverted.length}</p>
         </div>
         <div className="card-stat">
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-muted-foreground">Revenue (Month)</p>
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-sm text-muted-foreground">Campaign Revenue (Month)</p>
             <IndianRupee className="w-5 h-5 text-primary" />
           </div>
-          <p className="text-3xl font-bold mt-2">₹{totalRevenue.toLocaleString('en-IN')}</p>
+          <div className="space-y-1 overflow-y-auto max-h-[100px] pr-1 scrollbar-thin">
+            {campaignRevenue.length === 0 ? (
+              <p className="text-3xl font-bold mt-2 text-muted-foreground/30">₹0</p>
+            ) : (
+              campaignRevenue.map(([campaign, revenue]) => (
+                <div key={campaign} className="flex justify-between items-end gap-2">
+                  <span className="text-[11px] text-muted-foreground truncate">{campaign}</span>
+                  <span className="text-sm font-bold whitespace-nowrap">₹{revenue.toLocaleString('en-IN')}</span>
+                </div>
+              ))
+            )}
+          </div>
+          {campaignRevenue.length > 0 && (
+            <div className="pt-2 mt-2 border-t border-border/50 flex justify-between items-center text-[10px]">
+              <span className="text-muted-foreground uppercase tracking-wider font-semibold">Total</span>
+              <span className="font-bold text-primary text-sm">₹{totalRevenue.toLocaleString('en-IN')}</span>
+            </div>
+          )}
         </div>
       </div>
 
