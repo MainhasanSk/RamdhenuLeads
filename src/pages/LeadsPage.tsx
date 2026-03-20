@@ -1,7 +1,8 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useLeads } from '@/context/LeadContext';
 import { useAuth } from '@/context/AuthContext';
-import { CAMPAIGN_OPTIONS, SERVICE_OPTIONS, CampaignSource, ServiceType, LeadStatus, Lead } from '@/types/lead';
+import { SERVICE_OPTIONS, ServiceType, LeadStatus, Lead } from '@/types/lead';
+import { getAllCampaigns, type Campaign } from '@/lib/campaignService';
 import { StatusBadge } from '@/components/StatusBadge';
 import { UpdateFollowUpDialog } from '@/components/UpdateFollowUpDialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -25,11 +26,16 @@ export default function LeadsPage() {
   const [filterCampaign, setFilterCampaign] = useState<string>('all');
   const [filterService, setFilterService] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [dbCampaigns, setDbCampaigns] = useState<Campaign[]>([]);
 
   const [editLead, setEditLead] = useState<Lead | null>(null);
   const [editForm, setEditForm] = useState<Partial<Lead>>({});
   const [historyLead, setHistoryLead] = useState<Lead | null>(null);
   const [isActionLoading, setIsActionLoading] = useState(false);
+
+  useEffect(() => {
+    getAllCampaigns().then(setDbCampaigns).catch(console.error);
+  }, []);
 
   const filtered = useMemo(() => {
     return leads.filter(l => {
@@ -108,7 +114,7 @@ export default function LeadsPage() {
               <SelectTrigger><SelectValue placeholder="All Campaigns" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Campaigns</SelectItem>
-                {CAMPAIGN_OPTIONS.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                {dbCampaigns.map(c => <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>)}
               </SelectContent>
             </Select>
             <Select value={filterService} onValueChange={setFilterService}>
