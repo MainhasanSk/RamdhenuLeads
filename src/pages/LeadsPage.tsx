@@ -39,13 +39,30 @@ export default function LeadsPage() {
 
   const filtered = useMemo(() => {
     return leads.filter(l => {
-      if (search && !l.customerName.toLowerCase().includes(search.toLowerCase()) && !l.phoneNumber.includes(search)) return false;
+      const nameMatch = l.customerName ? String(l.customerName).toLowerCase().includes(search.toLowerCase()) : false;
+      const phoneMatch = l.phoneNumber ? String(l.phoneNumber).includes(search) : false;
+      if (search && !nameMatch && !phoneMatch) return false;
       if (filterCampaign !== 'all' && l.campaignSource !== filterCampaign) return false;
       if (filterService !== 'all' && l.serviceRequired !== filterService) return false;
       if (filterStatus !== 'all' && l.status !== filterStatus) return false;
       return true;
-    }).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    }).sort((a, b) => {
+      const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return timeB - timeA;
+    });
   }, [leads, search, filterCampaign, filterService, filterStatus]);
+
+  const safeFormatDate = (dateString?: string, formatStr: string = 'dd MMM') => {
+    if (!dateString) return '—';
+    try {
+      const parsed = parseISO(dateString);
+      if (isNaN(parsed.getTime())) return 'Invalid';
+      return format(parsed, formatStr);
+    } catch {
+      return 'Invalid';
+    }
+  };
 
   const handleEdit = (lead: Lead) => {
     setEditLead(lead);
@@ -172,18 +189,20 @@ export default function LeadsPage() {
                   </TableRow>
                 ) : filtered.map(l => (
                   <TableRow key={l.id}>
-                    <TableCell className="text-sm">{format(parseISO(l.inquiryDate), 'dd MMM')}</TableCell>
-                    <TableCell className="font-medium">{l.customerName}</TableCell>
+                    <TableCell className="text-sm">{safeFormatDate(l.inquiryDate)}</TableCell>
+                    <TableCell className="font-medium">{l.customerName || '—'}</TableCell>
                     <TableCell>
-                      <a href={`tel:${l.phoneNumber}`} className="text-primary hover:underline flex items-center gap-1">
-                        <Phone className="w-3 h-3" />{l.phoneNumber}
-                      </a>
+                      {l.phoneNumber ? (
+                        <a href={`tel:${l.phoneNumber}`} className="text-primary hover:underline flex items-center gap-1">
+                          <Phone className="w-3 h-3" />{l.phoneNumber}
+                        </a>
+                      ) : '—'}
                     </TableCell>
-                    <TableCell className="text-sm">{l.campaignSource}</TableCell>
-                    <TableCell className="text-sm">{l.serviceRequired === 'Other' ? l.customService : l.serviceRequired}</TableCell>
-                    <TableCell className="text-sm">{format(parseISO(l.nextFollowUpDate), 'dd MMM')}</TableCell>
+                    <TableCell className="text-sm">{l.campaignSource || '—'}</TableCell>
+                    <TableCell className="text-sm">{l.serviceRequired === 'Other' ? (l.customService || '—') : (l.serviceRequired || '—')}</TableCell>
+                    <TableCell className="text-sm">{safeFormatDate(l.nextFollowUpDate)}</TableCell>
                     <TableCell><StatusBadge status={l.status} /></TableCell>
-                    <TableCell>{l.amountReceived ? `₹${l.amountReceived.toLocaleString('en-IN')}` : '—'}</TableCell>
+                    <TableCell>{l.amountReceived ? `₹${Number(l.amountReceived).toLocaleString('en-IN')}` : '—'}</TableCell>
                     {isAdmin && <TableCell className="text-sm text-muted-foreground">{l.createdByName || '—'}</TableCell>}
                     <TableCell>
                       <div className="flex gap-1">

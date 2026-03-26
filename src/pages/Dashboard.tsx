@@ -16,20 +16,32 @@ export default function Dashboard() {
   const monthStart = startOfMonth(new Date());
   const monthEnd = endOfMonth(new Date());
 
+  const safeFormatDate = (dateString?: string, formatStr: string = 'dd MMM yyyy') => {
+    if (!dateString) return '—';
+    try {
+      const parsed = parseISO(dateString);
+      if (isNaN(parsed.getTime())) return 'Invalid';
+      return format(parsed, formatStr);
+    } catch {
+      return 'Invalid';
+    }
+  };
+
   const todaysFollowUps = useMemo(() =>
-    leads.filter(l => l.status === 'Follow Up' && isToday(parseISO(l.nextFollowUpDate))),
+    leads.filter(l => l.status === 'Follow Up' && l.nextFollowUpDate && isToday(parseISO(l.nextFollowUpDate))),
     [leads]
   );
 
   const missedFollowUps = useMemo(() =>
-    leads.filter(l => l.status === 'Follow Up' && isBefore(parseISO(l.nextFollowUpDate), today)),
+    leads.filter(l => l.status === 'Follow Up' && l.nextFollowUpDate && isBefore(parseISO(l.nextFollowUpDate), today)),
     [leads, today]
   );
 
   const monthlyConverted = useMemo(() =>
     leads.filter(l => {
-      if (l.status !== 'Convert') return false;
+      if (l.status !== 'Convert' || !l.updatedAt) return false;
       const d = parseISO(l.updatedAt);
+      if (isNaN(d.getTime())) return false;
       return d >= monthStart && d <= monthEnd;
     }),
     [leads, monthStart, monthEnd]
@@ -72,7 +84,10 @@ export default function Dashboard() {
       { name: 'Week 4', revenue: 0 },
     ];
     monthlyConverted.forEach(l => {
-      const day = parseISO(l.updatedAt).getDate();
+      if (!l.updatedAt) return;
+      const parsed = parseISO(l.updatedAt);
+      if (isNaN(parsed.getTime())) return;
+      const day = parsed.getDate();
       const wi = Math.min(Math.floor((day - 1) / 7), 3);
       weeks[wi].revenue += l.amountReceived || 0;
     });
@@ -181,7 +196,7 @@ export default function Dashboard() {
                             <a href={`tel:${l.phoneNumber}`}><Phone className="w-3.5 h-3.5 mr-1" />Call</a>
                           </Button>
                           <Button size="sm" variant="outline" className="text-success border-success/30 hover:bg-success/10" asChild>
-                            <a href={`https://wa.me/${l.phoneNumber.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer">
+                            <a href={`https://wa.me/${l.phoneNumber ? String(l.phoneNumber).replace(/[^0-9]/g, '') : ''}`} target="_blank" rel="noopener noreferrer">
                               <MessageCircle className="w-3.5 h-3.5 mr-1" />WA
                             </a>
                           </Button>
@@ -226,14 +241,14 @@ export default function Dashboard() {
                       <TableCell>{l.phoneNumber}</TableCell>
                       <TableCell>{l.campaignSource}</TableCell>
                       <TableCell>{l.serviceRequired === 'Other' ? l.customService : l.serviceRequired}</TableCell>
-                      <TableCell className="text-destructive font-medium">{format(parseISO(l.nextFollowUpDate), 'dd MMM yyyy')}</TableCell>
+                      <TableCell className="text-destructive font-medium">{safeFormatDate(l.nextFollowUpDate)}</TableCell>
                       <TableCell>
                         <div className="flex gap-2">
                           <Button size="sm" variant="outline" asChild>
                             <a href={`tel:${l.phoneNumber}`}><Phone className="w-3.5 h-3.5 mr-1" />Call</a>
                           </Button>
                           <Button size="sm" variant="outline" className="text-success border-success/30 hover:bg-success/10" asChild>
-                            <a href={`https://wa.me/${l.phoneNumber.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer">
+                            <a href={`https://wa.me/${l.phoneNumber ? String(l.phoneNumber).replace(/[^0-9]/g, '') : ''}`} target="_blank" rel="noopener noreferrer">
                               <MessageCircle className="w-3.5 h-3.5 mr-1" />WA
                             </a>
                           </Button>
