@@ -14,7 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { StatusBadge } from '@/components/StatusBadge';
 import { toast } from 'sonner';
-import { UserPlus, Trash2, Loader2, Users, ShieldCheck, ToggleLeft, ToggleRight, Pencil, Eye, IndianRupee, TrendingUp } from 'lucide-react';
+import { UserPlus, Trash2, Loader2, Users, ShieldCheck, ToggleLeft, ToggleRight, Pencil, Eye, IndianRupee, TrendingUp, Star } from 'lucide-react';
 import { Navigate } from 'react-router-dom';
 import { startOfMonth, endOfMonth, parseISO, format } from 'date-fns';
 
@@ -203,7 +203,7 @@ export default function StaffPage() {
                 <Label>Email *</Label>
                 <Input 
                   type="email" 
-                  placeholder="telecaller@junak.com" 
+                  placeholder="telecaller@ramdhenudigi.com" 
                   value={form.email} 
                   onChange={e => setForm({ ...form, email: e.target.value })}
                   required 
@@ -546,7 +546,23 @@ function TelecallerLeadsDialog({ user, leads, onClose }: { user: AppUser | null;
                   </TableRow>
                 ) : userLeads.map(lead => (
                   <TableRow key={lead.id}>
-                    <TableCell className="text-xs font-medium">{lead.customerName}</TableCell>
+                    <TableCell className="text-xs font-medium">
+                      <div>{lead.customerName}</div>
+                      {lead.conversionChance && (
+                        <div className="flex gap-0.5 mt-0.5">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <Star
+                              key={star}
+                              className={`w-2.5 h-2.5 ${
+                                star <= lead.conversionChance
+                                  ? 'fill-yellow-400 text-yellow-400'
+                                  : 'text-muted-foreground/20'
+                              }`}
+                            />
+                          ))}
+                        </div>
+                      )}
+                    </TableCell>
                     <TableCell className="text-xs">{lead.phoneNumber}</TableCell>
                     <TableCell className="text-xs">{lead.serviceRequired}</TableCell>
                     <TableCell><StatusBadge status={lead.status} /></TableCell>

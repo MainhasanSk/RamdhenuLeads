@@ -40,11 +40,11 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         )}
       >
         {/* Logo */}
-        <div className="h-16 flex items-center gap-2.5 px-5 border-b border-sidebar-border">
-          <img src={logo} alt="Junak Digital Dynamics" className="w-8 h-8 rounded-lg object-cover" />
-          <div>
-            <h1 className="text-sm font-bold text-sidebar-accent-foreground tracking-tight">Junak Digital</h1>
-            <p className="text-[10px] text-sidebar-muted tracking-wider uppercase">Dynamics CRM</p>
+        <div className="h-16 flex items-center gap-2 px-4 border-b border-sidebar-border">
+          <img src={logo} alt="Ramdhenu Digi Solution" className="h-9 w-auto object-contain bg-white rounded p-1 shadow-sm" />
+          <div className="min-w-0">
+            <h1 className="text-xs font-bold text-sidebar-accent-foreground truncate tracking-tight">Ramdhenu Digi</h1>
+            <p className="text-[9px] text-sidebar-muted tracking-wider uppercase">Lead Portal</p>
           </div>
           <button onClick={() => setSidebarOpen(false)} className="ml-auto lg:hidden text-sidebar-foreground">
             <X className="w-5 h-5" />
@@ -84,7 +84,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
         <div className="p-4 mx-3 mb-4 rounded-lg bg-sidebar-accent">
           <p className="text-xs text-sidebar-muted">Lead Management System</p>
-          <p className="text-[10px] text-sidebar-muted mt-0.5">v1.0 • Junak Digital Dynamics</p>
+          <p className="text-[10px] text-sidebar-muted mt-0.5">v1.0 • Ramdhenu Digi Solution</p>
         </div>
       </aside>
 
@@ -100,7 +100,9 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               <span className="text-xs font-medium text-foreground">{profile?.displayName || user?.email}</span>
               <span className="text-[10px] text-muted-foreground uppercase">{profile?.role || 'User'}</span>
             </div>
-            <img src={logo} alt="User" className="w-9 h-9 rounded-full border border-border shadow-sm object-cover" />
+            <div className="w-9 h-9 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-semibold text-sm shadow-sm select-none">
+              {(profile?.displayName || user?.email || 'U').substring(0, 2).toUpperCase()}
+            </div>
           </div>
         </header>
         <main className="flex-1 p-4 lg:p-8 overflow-auto">

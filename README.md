@@ -1,8 +1,8 @@
-# Junak Digital Dynamics — Lead CRM
+# Ramdhenu Digi Solution — Lead CRM
 
 ## Project info
 
-A professional lead management CRM for Junak Digital Dynamics.
+A professional lead management CRM for Ramdhenu Digi Solution.
 
 ## How to run locally
 
@@ -15,7 +15,7 @@ Follow these steps:
 git clone <YOUR_GIT_URL>
 
 # Step 2: Navigate to the project directory.
-cd junak-crm-pro
+cd LMS
 
 # Step 3: Install the necessary dependencies.
 npm i

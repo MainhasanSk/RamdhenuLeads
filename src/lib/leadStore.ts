@@ -1,6 +1,6 @@
 import { Lead, FollowUpEntry } from '@/types/lead';
 
-const STORAGE_KEY = 'junak_leads';
+const STORAGE_KEY = 'ramdhenu_leads';
 
 function getLeads(): Lead[] {
   try {
@@ -61,9 +61,9 @@ export function addFollowUp(leadId: string, entry: Omit<FollowUpEntry, 'id'>): L
 }
 
 export function exportLeadsCSV(leads: Lead[]): string {
-  const headers = ['Inquiry Date', 'Customer Name', 'Phone', 'Campaign', 'Service', 'Follow-up Date', 'Status', 'Amount', 'Cancel Reason'];
+  const headers = ['Inquiry Date', 'Customer Name', 'Conversion Chance', 'Phone', 'Campaign', 'Service', 'Follow-up Date', 'Status', 'Amount', 'Cancel Reason'];
   const rows = leads.map(l => [
-    l.inquiryDate, l.customerName, l.phoneNumber, l.campaignSource,
+    l.inquiryDate, l.customerName, l.conversionChance || '', l.phoneNumber, l.campaignSource,
     l.serviceRequired === 'Other' ? l.customService || 'Other' : l.serviceRequired,
     l.nextFollowUpDate, l.status, l.amountReceived || '', l.cancelReason || '',
   ]);

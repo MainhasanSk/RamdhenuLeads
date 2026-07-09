@@ -40,6 +40,7 @@ export interface Lead {
   status: LeadStatus;
   amountReceived?: number;
   cancelReason?: string;
+  conversionChance?: number;
   followUpHistory: FollowUpEntry[];
   createdBy?: string;
   createdByName?: string;

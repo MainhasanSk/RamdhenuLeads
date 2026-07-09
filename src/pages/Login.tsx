@@ -47,9 +47,9 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-muted/30 p-4">
       <div className="w-full max-w-md space-y-8">
         <div className="flex flex-col items-center text-center">
-          <img src={logo} alt="Junak CRM" className="w-16 h-16 rounded-xl shadow-lg mb-4" />
-          <h1 className="text-2xl font-bold tracking-tight">Junak CRM Pro</h1>
-          <p className="text-muted-foreground mt-1 text-sm uppercase tracking-widest font-medium">Digital Dynamics Management</p>
+          <img src={logo} alt="Ramdhenu Digi Solution" className="h-16 w-auto object-contain bg-white rounded-lg p-1 mb-4 shadow" />
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Ramdhenu Digi Solution</h1>
+          <p className="text-muted-foreground mt-1 text-xs uppercase tracking-widest font-semibold text-primary">Smart Strategies. Stronger Brands. Better Growth.</p>
         </div>
 
         <Card className="border-none shadow-xl bg-card">
@@ -68,7 +68,7 @@ export default function LoginPage() {
                 <Input 
                   id="email" 
                   type="email" 
-                  placeholder="admin@junak.com" 
+                  placeholder="admin@ramdhenudigi.com" 
                   value={email} 
                   onChange={(e) => setEmail(e.target.value)}
                   required 
@@ -93,7 +93,7 @@ export default function LoginPage() {
         </Card>
 
         <p className="text-center text-xs text-muted-foreground">
-          &copy; 2026 Junak Digital Dynamics. Authorized access only.
+          &copy; 2026 Ramdhenu Digi Solution. All rights reserved.
         </p>
       </div>
     </div>

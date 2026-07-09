@@ -1,0 +1,63 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function to check if the user is authenticated
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    // Helper function to get the user's document/profile
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+    
+    // Helper function to check if the user is an admin
+    function isAdmin() {
+      return isSignedIn() && (
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        getUserData().role == 'admin'
+      );
+    }
+
+    // Rules for the users collection
+    match /users/{userId} {
+      // Users can read their own profile. Admins can read all profiles.
+      allow read: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+      
+      // Allow users to create their own profile during registration/first login.
+      // Admins can create any profile.
+      allow create: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+      
+      // Admins can update any profile.
+      // Users can update their own profile, but they cannot change their role unless they are an admin.
+      allow update: if isSignedIn() && (
+        isAdmin() || 
+        (request.auth.uid == userId && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['role'])))
+      );
+      
+      allow delete: if isAdmin();
+    }
+
+    // Rules for the campaigns collection
+    match /campaigns/{campaignId} {
+      // Authenticated users can read campaigns.
+      allow read: if isSignedIn();
+      // Only admins can create, update, or delete campaigns.
+      allow write: if isAdmin();
+    }
+
+    // Rules for the leads collection
+    match /leads/{leadId} {
+      // Admins can read/write any lead.
+      // Telecallers can read, create, update, or delete leads they created.
+      allow read: if isSignedIn() && (isAdmin() || resource.data.createdBy == request.auth.uid);
+      allow create: if isSignedIn() && (isAdmin() || request.resource.data.createdBy == request.auth.uid);
+      allow update: if isSignedIn() && (
+        isAdmin() || 
+        (resource.data.createdBy == request.auth.uid && request.resource.data.createdBy == request.auth.uid)
+      );
+      allow delete: if isSignedIn() && (isAdmin() || resource.data.createdBy == request.auth.uid);
+    }
+  }
+}

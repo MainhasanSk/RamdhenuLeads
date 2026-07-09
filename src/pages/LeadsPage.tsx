@@ -15,7 +15,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { format, parseISO } from 'date-fns';
-import { Search, Trash2, Edit, Phone, Download, History, Loader2 } from 'lucide-react';
+import { Search, Trash2, Edit, Phone, Download, History, Loader2, Star } from 'lucide-react';
 import { exportLeadsCSV } from '@/lib/leadStore';
 import { FollowUpTimeline } from '@/components/FollowUpTimeline';
 
@@ -26,6 +26,8 @@ export default function LeadsPage() {
   const [filterCampaign, setFilterCampaign] = useState<string>('all');
   const [filterService, setFilterService] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [filterChance, setFilterChance] = useState<string>('all');
+  const [sortBy, setSortBy] = useState<string>('newest');
   const [dbCampaigns, setDbCampaigns] = useState<Campaign[]>([]);
 
   const [editLead, setEditLead] = useState<Lead | null>(null);
@@ -45,13 +47,46 @@ export default function LeadsPage() {
       if (filterCampaign !== 'all' && l.campaignSource !== filterCampaign) return false;
       if (filterService !== 'all' && l.serviceRequired !== filterService) return false;
       if (filterStatus !== 'all' && l.status !== filterStatus) return false;
+      
+      if (filterChance !== 'all') {
+        if (filterChance === 'not-set') {
+          if (l.conversionChance !== undefined && l.conversionChance !== null && l.conversionChance !== 0) return false;
+        } else {
+          const minStars = Number(filterChance);
+          if (!l.conversionChance || l.conversionChance < minStars) return false;
+        }
+      }
       return true;
     }).sort((a, b) => {
-      const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-      const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-      return timeB - timeA;
+      if (sortBy === 'newest') {
+        const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return timeB - timeA;
+      }
+      if (sortBy === 'oldest') {
+        const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return timeA - timeB;
+      }
+      if (sortBy === 'chance-desc') {
+        const chanceA = a.conversionChance || 0;
+        const chanceB = b.conversionChance || 0;
+        if (chanceA !== chanceB) return chanceB - chanceA;
+        const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return timeB - timeA;
+      }
+      if (sortBy === 'chance-asc') {
+        const chanceA = a.conversionChance || 0;
+        const chanceB = b.conversionChance || 0;
+        if (chanceA !== chanceB) return chanceA - chanceB;
+        const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return timeB - timeA;
+      }
+      return 0;
     });
-  }, [leads, search, filterCampaign, filterService, filterStatus]);
+  }, [leads, search, filterCampaign, filterService, filterStatus, filterChance, sortBy]);
 
   const safeFormatDate = (dateString?: string, formatStr: string = 'dd MMM') => {
     if (!dateString) return '—';
@@ -73,7 +108,11 @@ export default function LeadsPage() {
     if (!editLead) return;
     setIsActionLoading(true);
     try {
-      await updateLead(editLead.id, editForm);
+      const updatedForm = {
+        ...editForm,
+        nextFollowUpDate: editForm.status === 'Convert' ? '' : editForm.nextFollowUpDate,
+      };
+      await updateLead(editLead.id, updatedForm);
       setEditLead(null);
     } catch (error) {
       // toast is handled in context
@@ -122,7 +161,7 @@ export default function LeadsPage() {
       {/* Filters */}
       <Card>
         <CardContent className="pt-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input placeholder="Search name or phone..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
@@ -148,6 +187,27 @@ export default function LeadsPage() {
                 <SelectItem value="Follow Up">Follow Up</SelectItem>
                 <SelectItem value="Convert">Converted</SelectItem>
                 <SelectItem value="Cancel">Cancelled</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={filterChance} onValueChange={setFilterChance}>
+              <SelectTrigger><SelectValue placeholder="All Chances" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Chances (Stars)</SelectItem>
+                <SelectItem value="5">5 Stars (Very High)</SelectItem>
+                <SelectItem value="4">4+ Stars (High & above)</SelectItem>
+                <SelectItem value="3">3+ Stars (Medium & above)</SelectItem>
+                <SelectItem value="2">2+ Stars (Low & above)</SelectItem>
+                <SelectItem value="1">1+ Star (Very Low & above)</SelectItem>
+                <SelectItem value="not-set">Not Set</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger><SelectValue placeholder="Sort By" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="newest">Sort: Newest First</SelectItem>
+                <SelectItem value="oldest">Sort: Oldest First</SelectItem>
+                <SelectItem value="chance-desc">Sort: Highest Chance</SelectItem>
+                <SelectItem value="chance-asc">Sort: Lowest Chance</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -190,7 +250,23 @@ export default function LeadsPage() {
                 ) : filtered.map(l => (
                   <TableRow key={l.id}>
                     <TableCell className="text-sm">{safeFormatDate(l.inquiryDate)}</TableCell>
-                    <TableCell className="font-medium">{l.customerName || '—'}</TableCell>
+                    <TableCell className="font-medium">
+                      <div>{l.customerName || '—'}</div>
+                      {l.conversionChance && (
+                        <div className="flex gap-0.5 mt-1">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <Star
+                              key={star}
+                              className={`w-3.5 h-3.5 ${
+                                star <= l.conversionChance
+                                  ? 'fill-yellow-400 text-yellow-400'
+                                  : 'text-muted-foreground/20'
+                              }`}
+                            />
+                          ))}
+                        </div>
+                      )}
+                    </TableCell>
                     <TableCell>
                       {l.phoneNumber ? (
                         <a href={`tel:${l.phoneNumber}`} className="text-primary hover:underline flex items-center gap-1">
@@ -244,6 +320,35 @@ export default function LeadsPage() {
               </div>
             </div>
             <div>
+              <Label className="block mb-2">Conversion Chance</Label>
+              <div className="flex items-center gap-1.5 bg-muted/30 p-2.5 rounded-lg border border-border/50 w-fit">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    type="button"
+                    key={star}
+                    onClick={() => setEditForm({ ...editForm, conversionChance: star })}
+                    className="focus:outline-none group p-0.5"
+                  >
+                    <Star
+                      className={`w-5 h-5 transition-all duration-150 ${
+                        star <= (editForm.conversionChance || 0)
+                          ? 'fill-yellow-400 text-yellow-400 scale-105 filter drop-shadow-[0_0_2px_rgba(250,204,21,0.5)]'
+                          : 'text-muted-foreground/30 hover:text-yellow-400/60 hover:scale-105'
+                      }`}
+                    />
+                  </button>
+                ))}
+                <span className="text-xs font-medium text-muted-foreground ml-2">
+                  {editForm.conversionChance === 1 && 'Very Low'}
+                  {editForm.conversionChance === 2 && 'Low'}
+                  {editForm.conversionChance === 3 && 'Medium'}
+                  {editForm.conversionChance === 4 && 'High'}
+                  {editForm.conversionChance === 5 && 'Very High'}
+                  {!editForm.conversionChance && 'Not Set'}
+                </span>
+              </div>
+            </div>
+            <div>
               <Label>Status</Label>
               <Select value={editForm.status} onValueChange={v => setEditForm({ ...editForm, status: v as LeadStatus })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
@@ -266,10 +371,12 @@ export default function LeadsPage() {
                 <Textarea value={editForm.cancelReason || ''} onChange={e => setEditForm({ ...editForm, cancelReason: e.target.value })} />
               </div>
             )}
-            <div>
-              <Label>Next Follow-up Date</Label>
-              <Input type="date" value={editForm.nextFollowUpDate || ''} onChange={e => setEditForm({ ...editForm, nextFollowUpDate: e.target.value })} />
-            </div>
+            {editForm.status !== 'Convert' && (
+              <div>
+                <Label>Next Follow-up Date</Label>
+                <Input type="date" value={editForm.nextFollowUpDate || ''} onChange={e => setEditForm({ ...editForm, nextFollowUpDate: e.target.value })} />
+              </div>
+            )}
             <div>
               <Label>Business Details</Label>
               <Textarea value={editForm.businessDetails || ''} onChange={e => setEditForm({ ...editForm, businessDetails: e.target.value })} />

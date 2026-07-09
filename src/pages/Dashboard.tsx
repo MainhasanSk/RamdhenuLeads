@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useLeads } from '@/context/LeadContext';
 import { format, isToday, isBefore, startOfDay, startOfMonth, endOfMonth, parseISO } from 'date-fns';
-import { Phone, CalendarClock, TrendingUp, Users, IndianRupee, XCircle, AlertTriangle, MessageCircle, Loader2 } from 'lucide-react';
+import { Phone, CalendarClock, TrendingUp, Users, IndianRupee, XCircle, AlertTriangle, MessageCircle, Loader2, Star } from 'lucide-react';
 import { StatusBadge } from '@/components/StatusBadge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -185,7 +185,23 @@ export default function Dashboard() {
                 <TableBody>
                   {todaysFollowUps.map(l => (
                     <TableRow key={l.id}>
-                      <TableCell className="font-medium">{l.customerName}</TableCell>
+                      <TableCell className="font-medium">
+                        <div>{l.customerName}</div>
+                        {l.conversionChance && (
+                          <div className="flex gap-0.5 mt-1">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <Star
+                                key={star}
+                                className={`w-3 h-3 ${
+                                  star <= l.conversionChance
+                                    ? 'fill-yellow-400 text-yellow-400'
+                                    : 'text-muted-foreground/20'
+                                }`}
+                              />
+                            ))}
+                          </div>
+                        )}
+                      </TableCell>
                       <TableCell>{l.phoneNumber}</TableCell>
                       <TableCell>{l.campaignSource}</TableCell>
                       <TableCell>{l.serviceRequired === 'Other' ? l.customService : l.serviceRequired}</TableCell>
@@ -237,7 +253,23 @@ export default function Dashboard() {
                 <TableBody>
                   {missedFollowUps.map(l => (
                     <TableRow key={l.id} className="missed-row">
-                      <TableCell className="font-medium">{l.customerName}</TableCell>
+                      <TableCell className="font-medium">
+                        <div>{l.customerName}</div>
+                        {l.conversionChance && (
+                          <div className="flex gap-0.5 mt-1">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <Star
+                                key={star}
+                                className={`w-3 h-3 ${
+                                  star <= l.conversionChance
+                                    ? 'fill-yellow-400 text-yellow-400'
+                                    : 'text-muted-foreground/20'
+                                }`}
+                              />
+                            ))}
+                          </div>
+                        )}
+                      </TableCell>
                       <TableCell>{l.phoneNumber}</TableCell>
                       <TableCell>{l.campaignSource}</TableCell>
                       <TableCell>{l.serviceRequired === 'Other' ? l.customService : l.serviceRequired}</TableCell>

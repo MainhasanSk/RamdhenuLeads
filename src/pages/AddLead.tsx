@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { UserPlus, Loader2 } from 'lucide-react';
+import { UserPlus, Loader2, Star } from 'lucide-react';
 
 export default function AddLead() {
   const navigate = useNavigate();
@@ -39,6 +39,7 @@ export default function AddLead() {
     serviceRequired: '' as ServiceType | '',
     customService: '',
     businessDetails: '',
+    conversionChance: 3,
     nextFollowUpDate: '',
     status: 'Follow Up' as LeadStatus,
     amountReceived: '',
@@ -47,7 +48,8 @@ export default function AddLead() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.customerName || !form.phoneNumber || !form.campaignSource || !form.serviceRequired || !form.nextFollowUpDate) {
+    const isFollowUpDateRequired = form.status !== 'Convert';
+    if (!form.customerName || !form.phoneNumber || !form.campaignSource || !form.serviceRequired || (isFollowUpDateRequired && !form.nextFollowUpDate)) {
       toast.error('Please fill all required fields');
       return;
     }
@@ -62,7 +64,8 @@ export default function AddLead() {
         serviceRequired: form.serviceRequired as ServiceType,
         customService: form.customService,
         businessDetails: form.businessDetails,
-        nextFollowUpDate: form.nextFollowUpDate,
+        conversionChance: form.conversionChance,
+        nextFollowUpDate: form.status === 'Convert' ? '' : form.nextFollowUpDate,
         status: form.status,
       };
 
@@ -147,9 +150,40 @@ export default function AddLead() {
             </div>
 
             <div>
-              <Label>Next Follow-up Date *</Label>
-              <Input type="date" value={form.nextFollowUpDate} onChange={e => setForm({ ...form, nextFollowUpDate: e.target.value })} required />
+              <Label className="block mb-2">Conversion Chance</Label>
+              <div className="flex items-center gap-1.5 bg-muted/30 p-3 rounded-lg border border-border/50 w-fit">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    type="button"
+                    key={star}
+                    onClick={() => setForm({ ...form, conversionChance: star })}
+                    className="focus:outline-none group p-0.5"
+                  >
+                    <Star
+                      className={`w-6 h-6 transition-all duration-150 ${
+                        star <= form.conversionChance
+                          ? 'fill-yellow-400 text-yellow-400 scale-105 filter drop-shadow-[0_0_2px_rgba(250,204,21,0.5)]'
+                          : 'text-muted-foreground/30 hover:text-yellow-400/60 hover:scale-105'
+                      }`}
+                    />
+                  </button>
+                ))}
+                <span className="text-xs font-medium text-muted-foreground ml-2">
+                  {form.conversionChance === 1 && 'Very Low'}
+                  {form.conversionChance === 2 && 'Low'}
+                  {form.conversionChance === 3 && 'Medium'}
+                  {form.conversionChance === 4 && 'High'}
+                  {form.conversionChance === 5 && 'Very High'}
+                </span>
+              </div>
             </div>
+
+            {form.status !== 'Convert' && (
+              <div>
+                <Label>Next Follow-up Date *</Label>
+                <Input type="date" value={form.nextFollowUpDate} onChange={e => setForm({ ...form, nextFollowUpDate: e.target.value })} required />
+              </div>
+            )}
 
             <div>
               <Label>Status</Label>

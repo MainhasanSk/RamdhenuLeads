@@ -25,7 +25,7 @@ export function QuickStatusUpdate({ lead }: { lead: Lead }) {
     
     setIsLoading(true);
     try {
-      await updateLead(lead.id, { status: 'Convert', amountReceived: Number(amount) });
+      await updateLead(lead.id, { status: 'Convert', amountReceived: Number(amount), nextFollowUpDate: '' });
       setDialogType(null);
       setAmount('');
     } catch (error) {
