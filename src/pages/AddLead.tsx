@@ -54,6 +54,12 @@ export default function AddLead() {
       return;
     }
     
+    const cleanPhone = form.phoneNumber.replace(/\D/g, '');
+    if (cleanPhone.length !== 10) {
+      toast.error('Phone number must be exactly 10 digits');
+      return;
+    }
+    
     setIsSubmitting(true);
     try {
       const leadData: any = {
@@ -113,7 +119,16 @@ export default function AddLead() {
 
             <div>
               <Label>Phone Number *</Label>
-              <Input type="tel" placeholder="+91 XXXXX XXXXX" value={form.phoneNumber} onChange={e => setForm({ ...form, phoneNumber: e.target.value })} required />
+              <Input 
+                type="tel" 
+                placeholder="10-digit mobile number" 
+                value={form.phoneNumber} 
+                onChange={e => {
+                  const val = e.target.value.replace(/\D/g, '').slice(0, 10);
+                  setForm({ ...form, phoneNumber: val });
+                }} 
+                required 
+              />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

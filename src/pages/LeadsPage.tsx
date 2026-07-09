@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useLeads } from '@/context/LeadContext';
 import { useAuth } from '@/context/AuthContext';
 import { SERVICE_OPTIONS, ServiceType, LeadStatus, Lead } from '@/types/lead';
@@ -15,11 +16,12 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { format, parseISO } from 'date-fns';
-import { Search, Trash2, Edit, Phone, Download, History, Loader2, Star } from 'lucide-react';
+import { Search, Trash2, Edit, Phone, Download, History, Loader2, Star, Plus } from 'lucide-react';
 import { exportLeadsCSV } from '@/lib/leadStore';
 import { FollowUpTimeline } from '@/components/FollowUpTimeline';
 
 export default function LeadsPage() {
+  const navigate = useNavigate();
   const { leads, updateLead, deleteLead, isLoading } = useLeads();
   const { isAdmin } = useAuth();
   const [search, setSearch] = useState('');
@@ -106,6 +108,11 @@ export default function LeadsPage() {
 
   const handleSaveEdit = async () => {
     if (!editLead) return;
+    const cleanPhone = (editForm.phoneNumber || '').replace(/\D/g, '');
+    if (cleanPhone.length !== 10) {
+      toast.error('Phone number must be exactly 10 digits');
+      return;
+    }
     setIsActionLoading(true);
     try {
       const updatedForm = {
@@ -153,9 +160,14 @@ export default function LeadsPage() {
           <h1 className="text-2xl font-bold text-foreground">Leads Management</h1>
           <p className="text-sm text-muted-foreground mt-1">{filtered.length} leads found</p>
         </div>
-        <Button variant="outline" onClick={handleExport}>
-          <Download className="w-4 h-4 mr-2" />Export CSV
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={handleExport}>
+            <Download className="w-4 h-4 mr-2" />Export CSV
+          </Button>
+          <Button onClick={() => navigate('/add-lead')}>
+            <Plus className="w-4 h-4 mr-2" />Add Lead
+          </Button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -315,8 +327,15 @@ export default function LeadsPage() {
                 <Input value={editForm.customerName || ''} onChange={e => setEditForm({ ...editForm, customerName: e.target.value })} />
               </div>
               <div>
-                <Label>Phone</Label>
-                <Input value={editForm.phoneNumber || ''} onChange={e => setEditForm({ ...editForm, phoneNumber: e.target.value })} />
+                <Label>Phone *</Label>
+                <Input 
+                  placeholder="10-digit mobile number" 
+                  value={editForm.phoneNumber || ''} 
+                  onChange={e => {
+                    const val = e.target.value.replace(/\D/g, '').slice(0, 10);
+                    setEditForm({ ...editForm, phoneNumber: val });
+                  }} 
+                />
               </div>
             </div>
             <div>
