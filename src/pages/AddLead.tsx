@@ -44,6 +44,7 @@ export default function AddLead() {
     status: 'Follow Up' as LeadStatus,
     amountReceived: '',
     cancelReason: '',
+    conversationDetails: '',
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -62,6 +63,15 @@ export default function AddLead() {
     
     setIsSubmitting(true);
     try {
+      const followUpHistory = [];
+      if (form.conversationDetails.trim()) {
+        followUpHistory.push({
+          id: crypto.randomUUID(),
+          date: new Date().toISOString(),
+          note: form.conversationDetails.trim(),
+        });
+      }
+
       const leadData: any = {
         inquiryDate: form.inquiryDate,
         customerName: form.customerName,
@@ -73,6 +83,7 @@ export default function AddLead() {
         conversionChance: form.conversionChance,
         nextFollowUpDate: form.status === 'Convert' ? '' : form.nextFollowUpDate,
         status: form.status,
+        followUpHistory,
       };
 
       if (form.status === 'Convert') {
@@ -194,10 +205,16 @@ export default function AddLead() {
             </div>
 
             {form.status !== 'Convert' && (
-              <div>
-                <Label>Next Follow-up Date *</Label>
-                <Input type="date" value={form.nextFollowUpDate} onChange={e => setForm({ ...form, nextFollowUpDate: e.target.value })} required />
-              </div>
+              <>
+                <div>
+                  <Label>Next Follow-up Date *</Label>
+                  <Input type="date" value={form.nextFollowUpDate} onChange={e => setForm({ ...form, nextFollowUpDate: e.target.value })} required />
+                </div>
+                <div>
+                  <Label>Conversation Details (optional)</Label>
+                  <Textarea placeholder="Enter initial conversation details..." value={form.conversationDetails} onChange={e => setForm({ ...form, conversationDetails: e.target.value })} />
+                </div>
+              </>
             )}
 
             <div>

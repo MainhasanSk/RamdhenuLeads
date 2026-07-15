@@ -17,14 +17,22 @@ export function UpdateFollowUpDialog({ lead }: { lead: Lead }) {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSave = async () => {
-    if (!date) return;
+    if (!date) {
+      toast.error('Please select a next follow-up date');
+      return;
+    }
+    if (!note.trim()) {
+      toast.error('Please enter conversation details');
+      return;
+    }
     
     setIsLoading(true);
     try {
       await updateLead(lead.id, { nextFollowUpDate: date });
-      if (note.trim()) {
-        await addFollowUp(lead.id, { date: new Date().toISOString().split('T')[0], note: note.trim() });
-      }
+      await addFollowUp(lead.id, { 
+        date: new Date().toISOString(), 
+        note: note.trim() 
+      });
       setOpen(false);
       setNote('');
     } catch (error) {
@@ -47,12 +55,12 @@ export function UpdateFollowUpDialog({ lead }: { lead: Lead }) {
         </DialogHeader>
         <div className="space-y-4 mt-2">
           <div>
-            <Label>Next Follow-up Date</Label>
+            <Label>Next Follow-up Date *</Label>
             <Input type="date" value={date} onChange={e => setDate(e.target.value)} />
           </div>
           <div>
-            <Label>Note (optional)</Label>
-            <Textarea placeholder="Add a note about this follow-up..." value={note} onChange={e => setNote(e.target.value)} />
+            <Label>Conversation Details *</Label>
+            <Textarea placeholder="Enter details of your conversation..." value={note} onChange={e => setNote(e.target.value)} />
           </div>
           <Button onClick={handleSave} className="w-full" disabled={isLoading}>
             {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}

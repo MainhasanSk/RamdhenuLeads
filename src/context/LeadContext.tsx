@@ -9,7 +9,7 @@ interface LeadContextType {
   leads: Lead[];
   isLoading: boolean;
   refresh: () => Promise<void>;
-  addLead: (lead: Omit<Lead, 'id' | 'createdAt' | 'updatedAt' | 'followUpHistory'>) => Promise<Lead>;
+  addLead: (lead: Omit<Lead, 'id' | 'createdAt' | 'updatedAt' | 'followUpHistory'> & { followUpHistory?: FollowUpEntry[] }) => Promise<Lead>;
   updateLead: (id: string, updates: Partial<Lead>) => Promise<void>;
   deleteLead: (id: string) => Promise<void>;
   addFollowUp: (leadId: string, entry: Omit<FollowUpEntry, 'id'>) => Promise<void>;
@@ -49,7 +49,7 @@ export function LeadProvider({ children }: { children: React.ReactNode }) {
     refresh();
   }, [refresh]);
 
-  const handleAdd = useCallback(async (lead: Omit<Lead, 'id' | 'createdAt' | 'updatedAt' | 'followUpHistory'>) => {
+  const handleAdd = useCallback(async (lead: Omit<Lead, 'id' | 'createdAt' | 'updatedAt' | 'followUpHistory'> & { followUpHistory?: FollowUpEntry[] }) => {
     try {
       const result = await leadService.addLead({
         ...lead,

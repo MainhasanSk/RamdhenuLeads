@@ -1,7 +1,7 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useLeads } from '@/context/LeadContext';
 import { format, isToday, isBefore, startOfDay, startOfMonth, endOfMonth, parseISO } from 'date-fns';
-import { Phone, CalendarClock, TrendingUp, Users, IndianRupee, XCircle, AlertTriangle, MessageCircle, Loader2, Star } from 'lucide-react';
+import { Phone, CalendarClock, TrendingUp, Users, IndianRupee, XCircle, AlertTriangle, MessageCircle, Loader2, Star, History } from 'lucide-react';
 import { StatusBadge } from '@/components/StatusBadge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,9 +9,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { UpdateFollowUpDialog } from '@/components/UpdateFollowUpDialog';
 import { QuickStatusUpdate } from '@/components/QuickStatusUpdate';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { FollowUpTimeline } from '@/components/FollowUpTimeline';
+import { Lead } from '@/types/lead';
 
 export default function Dashboard() {
   const { leads, isLoading } = useLeads();
+  const [historyLead, setHistoryLead] = useState<Lead | null>(null);
   const today = startOfDay(new Date());
   const monthStart = startOfMonth(new Date());
   const monthEnd = endOfMonth(new Date());
@@ -217,6 +221,9 @@ export default function Dashboard() {
                             </a>
                           </Button>
                           <UpdateFollowUpDialog lead={l} />
+                          <Button size="sm" variant="outline" onClick={() => setHistoryLead(l)}>
+                            <History className="w-3.5 h-3.5 mr-1" />History
+                          </Button>
                           <QuickStatusUpdate lead={l} />
                         </div>
                       </TableCell>
@@ -285,6 +292,9 @@ export default function Dashboard() {
                             </a>
                           </Button>
                           <UpdateFollowUpDialog lead={l} />
+                          <Button size="sm" variant="outline" onClick={() => setHistoryLead(l)}>
+                            <History className="w-3.5 h-3.5 mr-1" />History
+                          </Button>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -378,6 +388,16 @@ export default function Dashboard() {
           </Card>
         </div>
       )}
+
+      {/* History Dialog */}
+      <Dialog open={!!historyLead} onOpenChange={o => !o && setHistoryLead(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Follow-up History — {historyLead?.customerName}</DialogTitle>
+          </DialogHeader>
+          {historyLead && <FollowUpTimeline lead={historyLead} />}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

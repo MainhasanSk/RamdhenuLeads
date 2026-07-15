@@ -22,7 +22,7 @@ import { FollowUpTimeline } from '@/components/FollowUpTimeline';
 
 export default function LeadsPage() {
   const navigate = useNavigate();
-  const { leads, updateLead, deleteLead, isLoading } = useLeads();
+  const { leads, updateLead, deleteLead, addFollowUp, isLoading } = useLeads();
   const { isAdmin } = useAuth();
   const [search, setSearch] = useState('');
   const [filterCampaign, setFilterCampaign] = useState<string>('all');
@@ -34,6 +34,7 @@ export default function LeadsPage() {
 
   const [editLead, setEditLead] = useState<Lead | null>(null);
   const [editForm, setEditForm] = useState<Partial<Lead>>({});
+  const [editConversationDetails, setEditConversationDetails] = useState('');
   const [historyLead, setHistoryLead] = useState<Lead | null>(null);
   const [isActionLoading, setIsActionLoading] = useState(false);
 
@@ -104,6 +105,7 @@ export default function LeadsPage() {
   const handleEdit = (lead: Lead) => {
     setEditLead(lead);
     setEditForm({ ...lead });
+    setEditConversationDetails('');
   };
 
   const handleSaveEdit = async () => {
@@ -120,7 +122,14 @@ export default function LeadsPage() {
         nextFollowUpDate: editForm.status === 'Convert' ? '' : editForm.nextFollowUpDate,
       };
       await updateLead(editLead.id, updatedForm);
+      if (editConversationDetails.trim()) {
+        await addFollowUp(editLead.id, {
+          date: new Date().toISOString(),
+          note: editConversationDetails.trim()
+        });
+      }
       setEditLead(null);
+      setEditConversationDetails('');
     } catch (error) {
       // toast is handled in context
     } finally {
@@ -391,10 +400,16 @@ export default function LeadsPage() {
               </div>
             )}
             {editForm.status !== 'Convert' && (
-              <div>
-                <Label>Next Follow-up Date</Label>
-                <Input type="date" value={editForm.nextFollowUpDate || ''} onChange={e => setEditForm({ ...editForm, nextFollowUpDate: e.target.value })} />
-              </div>
+              <>
+                <div>
+                  <Label>Next Follow-up Date</Label>
+                  <Input type="date" value={editForm.nextFollowUpDate || ''} onChange={e => setEditForm({ ...editForm, nextFollowUpDate: e.target.value })} />
+                </div>
+                <div>
+                  <Label>Conversation Details (optional)</Label>
+                  <Textarea placeholder="Add details of the conversation..." value={editConversationDetails} onChange={e => setEditConversationDetails(e.target.value)} />
+                </div>
+              </>
             )}
             <div>
               <Label>Business Details</Label>

@@ -47,10 +47,10 @@ export async function getLeadsByUser(userId: string): Promise<Lead[]> {
     .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
 }
 
-export async function addLead(lead: Omit<Lead, 'id' | 'createdAt' | 'updatedAt' | 'followUpHistory'> & { createdBy: string; createdByName: string }): Promise<Lead> {
+export async function addLead(lead: Omit<Lead, 'id' | 'createdAt' | 'updatedAt' | 'followUpHistory'> & { followUpHistory?: FollowUpEntry[]; createdBy: string; createdByName: string }): Promise<Lead> {
   const newLeadData = {
     ...lead,
-    followUpHistory: [],
+    followUpHistory: lead.followUpHistory || [],
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   };
@@ -60,7 +60,7 @@ export async function addLead(lead: Omit<Lead, 'id' | 'createdAt' | 'updatedAt' 
   return {
     ...lead,
     id: docRef.id,
-    followUpHistory: [],
+    followUpHistory: lead.followUpHistory || [],
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
